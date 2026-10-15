@@ -1,4 +1,25 @@
-# Reproducible local measurements — 14 October 2026
+# Reproducible local measurements
+
+## Current usability pass — 15 October 2026
+
+The final usability-pass production build was measured on15 October2026 from13:08:04 to13:08:27 IST. Environment: Windows10.0.26300 x64, Node24.13.0, Intel i7-14700K,28logical CPUs,34,114,199,552RAMbytes, Chromium156.0.8078.4, Playwright1.64.1, viewport1440×1000. The workstation was shared. No artificial network/CPU throttling was used.
+
+All six exact100/500/1,000-node broad/balanced fixtures passed the existing budgets. There were72 retained measurements after18 warmups and no reported browser errors. Each fixture uses fictional literal Text leaves, semantic tokens and a flex root; balanced fixtures add eight-way grid Frames. There are no ticket records or network connectors. Completion includes Playwright input, local HTTP/WebSocket work, revision polling and preview DOM observation. With12 samples, nearest-rank p95 is the observed maximum; it is not intrinsic paint/input latency or a concurrency-load guarantee.
+
+| Shape | Nodes | Browser median ms | Browser p95 ms | Budget ms |
+|---|---:|---:|---:|---:|
+| Broad siblings |100|26.359|48.642|500|
+| Broad siblings |500|106.392|153.010|750|
+| Broad siblings |1,000|285.046|316.005|1,000|
+| Balanced tree |100|41.800|80.065|500|
+| Balanced tree |500|108.261|147.593|750|
+| Balanced tree |1,000|302.196|344.733|1,000|
+
+The worst current observed p95 is344.733ms, higher than the historical166.167ms below. This run supports passing the stated local workflow budgets, not a claim that this interface pass improved speed. Node-only measurements were not rerun because the compiler/core/runtime sources are unchanged. The benchmark service used isolated persistence and stopped after the run.
+
+Current production chunks: initial editor App143.79kB/43.31gzip; shared React/runtime219.42kB/68.54gzip; deferred CodeMirror394.83kB/134.40gzip; deferred AST importer563.45kB/131.08gzip. These are individual chunks, not total initial download. The importer500kB warning remains visible and its threshold is unchanged. [Verification](VERIFICATION.md) records the source comparison and test boundaries.
+
+## Historical baseline — 14 October 2026
 
 Historical local source checkpoint c14adca (14 October 2026); see [verification provenance](VERIFICATION.md). Windows10.0.26300 x64, Node24.13.0, Intel i7-14700K,28logical CPUs,34,114,199,552RAMbytes; shared workstation. Browser Chromium156.0.8078.4, Playwright1.64.1, viewport1440×1000. These observations are not generalized production-load guarantees.
 

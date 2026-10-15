@@ -6,7 +6,7 @@ A visual application builder that connects structured design, a documented React
 
 ![Actual Studio editor with a layer tree, visual support workspace and contextual inspector](docs/screenshots/editor-desktop.png)
 
-[Case study](docs/CASE_STUDY.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md) · [Signature demo](docs/DEMO_SCRIPT.md)
+[Case study](docs/CASE_STUDY.md) · [Design direction](docs/DESIGN_DIRECTION.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md) · [Signature demo](docs/DEMO_SCRIPT.md)
 
 ## Run locally
 
@@ -24,6 +24,7 @@ Optional: copy .env.example to .env and configure it privately. Names: PORT, STU
 ## Implemented
 
 - Palette/layers, canvas, contextual inspector, structured responsive flex/grid layouts, primitive/semantic color and numeric tokens, themes, CodeMirror and desktop/tablet/phone preview. Insertion, selection, nesting, reordering, resizing, alignment, copy/paste, duplication, deletion, zoom/pan and actor-safe undo/redo have visible or keyboard controls.
+- A modern minimalist interface with automatic canvas fitting, retained manual zoom, Ctrl/Cmd+K layer search, a compact workflow guide, readable inspector groups/help and focused phone panels. The editor theme remains separate from the application theme.
 - Shared catalog: frames, text, buttons, fields, selects, tabs, badges, tables and detail panels. Fictional tickets support working search, filtering, selection, assignment/status, activity and loading/empty/error/retry states.
 - Babel AST import and deterministic generation for the [supported TSX subset](docs/SUPPORTED_CODE.md), stable identities/locations and inspected revision-aware changes. Invalid drafts retain the last valid preview. Outside handwritten source is recoverable text and is not executed in Studio/export.
 - Server-issued pseudonymous sessions, ownership/editor/viewer permissions, invitations, Yjs collaboration/presence, conditional field merging, offline queues/reconnect, SQLite persistence, immutable versions and inspected restore. HTTP/WebSocket permission changes are enforced on live connections and reconnects. See [collaboration](docs/COLLABORATION.md).
@@ -48,7 +49,7 @@ npm run benchmark
 npm run benchmark:browser
 ```
 
-The historical 14 October2026 checkpoint passed236 unit/integration tests and19 production browser tests, plus lint/typecheck/build and a clean independent export installation/build/interaction check. [Verification](docs/VERIFICATION.md) separates that evidence from checks run on this selective public snapshot. The browser suite owns isolated4183; browser benchmark owns4188 and requires a fresh build. Raw logs/browser state/databases are not distributed. [Performance](docs/PERFORMANCE.md) gives exact fixtures, hardware, budgets and observed timings; browser measurements include automation/network/DOM observation. The deferred AST importer still emits its bundle-size warning.
+The 15 October2026 usability pass passed236 unit/integration tests, lint/typecheck/build and23 production browser tests. After the final compact phone-guide and initial phone-preview refinements, the five affected browser checks passed again. Snapshot checks and the historical clean independent export verification are distinguished in [verification](docs/VERIFICATION.md). The browser suite owns isolated4183; browser benchmark owns4188 and requires a fresh build. Raw logs/browser state/databases are not distributed. [Performance](docs/PERFORMANCE.md) gives exact fixtures, hardware, budgets and observed timings; browser measurements include automation/network/DOM observation. The deferred AST importer still emits its bundle-size warning.
 
 ## Hosting and recovery
 

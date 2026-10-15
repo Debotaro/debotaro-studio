@@ -1,6 +1,6 @@
 # Verification scope and provenance
 
-This selective public source snapshot was prepared15 October2026 from the locally verified product. Product behavior in src/core, src/compiler, src/runtime, src/editor, server and tests is retained; the only source adaptation is case-study narrative pointing to this public document. Package root license metadata and public documentation were adapted. Private prompts, implementation notes, database/browser state and raw logs are not part of this snapshot.
+This selective public source snapshot was prepared15 October2026 from the locally verified product and updated with the usability pass described below. Current core, compiler, runtime, editor, server and test source is retained; the only source adaptation relative to that current product is case-study narrative pointing to this public document. Package root license metadata and public documentation were adapted. Private prompts, implementation notes, database/browser state and raw logs are not part of this snapshot.
 
 ## Historical executed evidence —14 October2026
 
@@ -35,6 +35,32 @@ The selective snapshot was installed and checked on15 October2026 at10:15 IST, u
 | npm run build | PASS; includes another typecheck; deferred importer563.45kB warning remains |
 
 No production browser, export master or benchmark was rerun for this documentation/metadata packaging step. Corresponding historical evidence is identified above; it is not represented as a fresh public-snapshot run. Private-root product files and metadata were not changed. Snapshot core/compiler/runtime/server/editor/test source bytes were compared with the original; only the explicitly documented case-study narrative differs. Generated dependencies/build/test artifacts are ignored and excluded from the publication manifest.
+
+## Usability pass — 15 October 2026
+
+This update changes editor navigation, inspector presentation and interface styling; it adds a canvas-fitting hook and four browser regressions. It does not change schema, compiler, runtime, server, dependencies or lockfiles. The five updated source/test files were copied byte-for-byte into this snapshot and compared. The case-study narrative adaptation remains preserved.
+
+| Executed product check | Actual result and scope |
+|---|---|
+| npm run lint; npm run typecheck; npm test | PASS;236 tests across18 files |
+| npm run build | PASS; initial App143.79kB/43.31gzip, deferred importer563.45kB/131.08gzip; importer warning retained |
+| Production npm run test:browser | PASS;23 tests57.9s, including four new usability regressions and existing visual/code/collaboration/recovery/export checks |
+| Focused production browser rerun | PASS;5 tests10.3s after the final compact phone-guide and initial phone-preview refinements; the whole23-test suite was not rerun after those two refinements |
+| npm run benchmark:browser | PASS;6fixtures,72 retained samples/18warmups, zero reported errors; worst observed p95344.733ms including automation/network/DOM observation |
+| Export source comparison | PASS; all20 critical source hashes still match the passing14 October clean independent-export master; no new clean export installation is claimed |
+
+The first broad browser attempt failed four checks because two controls had the same Workspace guide name. The duplicate control was consolidated and the unchanged checks passed in the subsequent full23-test run. No failing assertion was disabled. Actual desktop/phone layouts and inspector states were inspected. These are scoped local observations, not user-research results or accessibility certification.
+
+The final public-copy checks ran on15 October2026 at13:12–13:13 IST with the existing pinned installation; no dependency installation or change was needed:
+
+| Public-copy command | Actual result |
+|---|---|
+| npm run lint | PASS |
+| npm run typecheck | PASS |
+| npm test | PASS;236 tests/18 files,12.82s |
+| npm run build | PASS;2088 modules, App143.79kB/43.31gzip; deferred importer warning retained |
+
+No public-copy browser service or export master was started for this packaging step; the product browser evidence applies to the compared source files. Raw logs remain outside the public tree. Generated dependencies/build/test files remain ignored and are not publication content.
 
 ## Explicitly unverified
 
