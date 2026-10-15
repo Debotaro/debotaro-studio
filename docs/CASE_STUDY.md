@@ -1,6 +1,6 @@
 # Debotaro Studio — a shared canvas, a working system
 
-**Independent product / Design engineering / Working local prototype**  
+**Independent product / Design engineering / Working local prototype**
 Evidence checkpoint: 14 October 2026. Public implementation scope and current checks: [verification](VERIFICATION.md) and [architecture](ARCHITECTURE.md).
 
 ![Debotaro Studio running with its layer tree, support-workspace canvas and contextual inspector.](screenshots/editor-desktop.png)
