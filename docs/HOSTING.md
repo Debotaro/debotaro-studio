@@ -36,14 +36,11 @@ If a reverse proxy is introduced, configure only the necessary trusted proxy pat
 
 ## GitHub.io remains the entry point
 
-[GitHub Pages is a static host](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages). Keep Debotaro’s existing portfolio intact. Add a project card with two links after their actual destinations exist:
+[GitHub Pages is a static host](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages). The [Studio portfolio spotlight](https://debotaro.github.io/#studio) is now live with the actual product screenshot, [case study](https://github.com/Debotaro/debotaro-studio/blob/main/docs/CASE_STUDY.md) and [source](https://github.com/Debotaro/debotaro-studio) links. The original portfolio feature and all ten existing applications are preserved. The [existing build/test workflow](https://github.com/Debotaro/Debotaro.github.io/actions/runs/38741209874) gated publication; 507 browser cases passed with 8 existing opt-in/browser-specific skips, and all ten new Studio-entry cases passed across five browser projects.
 
-- **Read the case study** → a static narrative/screenshot page on the portfolio, or the authorized Studio host’s /case-study path.
-- **Open Studio** → the full Node-hosted product origin, with a private-demo entry.
+The user chose to keep Studio local for now. There is no hosted Studio application URL, and the portfolio does not pretend to launch the editor. If the user later authorizes full hosting, verify the Node service, persistence and hosted boundaries below before adding **Open Studio** to this existing spotlight. Keep the existing source/case links and private-demo entry; no second project card is needed.
 
-Suggested card copy: “Debotaro Studio — a visual application builder with a documented React contract. Product direction and AI-assisted implementation by Debotaro.”
-
-Use actual destinations after they exist. Source publication does not imply a hosted Studio demo. The React case-study component is in src/portfolio/CaseStudy.tsx; docs/CASE_STUDY.md is the portable narrative. A static portfolio can adapt that content and actual screenshots without pointing its browser at Studio APIs. An independently exported app can also be statically hosted after checking its own base path and source/licensing, but this does not host the Studio backend.
+The React case-study component is in src/portfolio/CaseStudy.tsx; docs/CASE_STUDY.md is the portable narrative. An independently exported app can also be statically hosted after checking its own base path and source/licensing, but this does not host the Studio backend.
 
 ## Backup without silent data loss
 
