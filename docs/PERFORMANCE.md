@@ -1,6 +1,38 @@
 # Reproducible local measurements
 
-## Current usability pass — 15 October 2026
+## Final capacity and ledger-recovery integration — 15 October 2026, 18:26 IST
+
+Fresh production browser measurement after the final persisted-counter guard. Same shared Windows10.0.26300 x64 workstation, Node24.13.0, Intel i7-14700K/28 logical CPUs,34,114,199,552 RAM bytes, Chromium156.0.8078.4, Playwright1.64.1 and1440×1000 viewport. Same exact broad/balanced fixtures,3 warmups/12 measured samples per fixture,72 samples/18 warmups total. All budgets PASS; zero errors; owned isolated service stopped. No other main CPU-heavy build/test was intentionally overlapped with this run.
+
+| Shape | Nodes | Browser median ms | Browser p95 ms | Budget ms |
+|---|---:|---:|---:|---:|
+| Broad siblings |100|32.142|45.996|500|
+| Broad siblings |500|101.817|128.552|750|
+| Broad siblings |1,000|263.971|310.308|1,000|
+| Balanced tree |100|29.727|47.642|500|
+| Balanced tree |500|104.584|119.894|750|
+| Balanced tree |1,000|250.708|312.773|1,000|
+
+Metric includes automation/network/DOM observation, not intrinsic paint. Timing variation on a shared workstation does not establish an optimization effect or production-load guarantee. Report identifier browser-2026-10-15T12-55-57-766Z/report.json; rerun npm run benchmark:browser after npm run build. Earlier runs below remain historical. Compiler/core/runtime/export/dependency sources remain unchanged; Node-only measurements were not rerun. Current App143.96kB/43.39gzip; deferred importer563.45kB/131.08gzip warning retained. These are individual chunks, not total initial download.
+
+## Earlier capacity pass — 15 October 2026
+
+The final capacity-pass production build was measured on15 October2026 from13:47:57 to13:48:15 IST. Same environment and methodology as below: Windows10.0.26300 x64, Node24.13.0, Intel i7-14700K,28logical CPUs,34,114,199,552RAMbytes, Chromium156.0.8078.4, Playwright1.64.1, viewport1440×1000. The isolated service stopped after the run; no browser errors were reported. No artificial throttling was applied.
+
+| Shape | Nodes | Browser median ms | Browser p95 ms | Budget ms |
+|---|---:|---:|---:|---:|
+| Broad siblings |100|31.487|32.979|500|
+| Broad siblings |500|79.352|102.867|750|
+| Broad siblings |1,000|142.378|160.494|1,000|
+| Balanced tree |100|31.695|33.917|500|
+| Balanced tree |500|86.049|108.405|750|
+| Balanced tree |1,000|148.778|173.552|1,000|
+
+All6fixtures/72retained samples/18warmups passed their preselected budgets. The worst observed p95 was173.552ms. These values differ from the preceding344.733ms and historical166.167ms; shared-workstation observations do not establish an optimization or causal performance improvement. Completion includes automation/network/revision polling/preview DOM observation, not intrinsic input or paint. No collaboration-load or public-network guarantee follows. Node-only measurements were not rerun; core/compiler/runtime remain unchanged.
+
+Current build: initial App143.96kB/43.39gzip; shared React/runtime219.42kB/68.54gzip; deferred CodeMirror394.83kB/134.40gzip; deferred AST importer563.45kB/131.08gzip. The importer warning and500kB threshold are retained. Values describe individual chunks, not a total download claim.
+
+## Earlier usability pass — 15 October 2026
 
 The final usability-pass production build was measured on15 October2026 from13:08:04 to13:08:27 IST. Environment: Windows10.0.26300 x64, Node24.13.0, Intel i7-14700K,28logical CPUs,34,114,199,552RAMbytes, Chromium156.0.8078.4, Playwright1.64.1, viewport1440×1000. The workstation was shared. No artificial network/CPU throttling was used.
 
@@ -15,9 +47,9 @@ All six exact100/500/1,000-node broad/balanced fixtures passed the existing budg
 | Balanced tree |500|108.261|147.593|750|
 | Balanced tree |1,000|302.196|344.733|1,000|
 
-The worst current observed p95 is344.733ms, higher than the historical166.167ms below. This run supports passing the stated local workflow budgets, not a claim that this interface pass improved speed. Node-only measurements were not rerun because the compiler/core/runtime sources are unchanged. The benchmark service used isolated persistence and stopped after the run.
+The worst observed p95 in that earlier run was344.733ms, higher than the historical166.167ms below. This supports passing the stated local workflow budgets, not a claim that this interface pass improved speed. Node-only measurements were not rerun because the compiler/core/runtime sources are unchanged. The benchmark service used isolated persistence and stopped after the run.
 
-Current production chunks: initial editor App143.79kB/43.31gzip; shared React/runtime219.42kB/68.54gzip; deferred CodeMirror394.83kB/134.40gzip; deferred AST importer563.45kB/131.08gzip. These are individual chunks, not total initial download. The importer500kB warning remains visible and its threshold is unchanged. [Verification](VERIFICATION.md) records the source comparison and test boundaries.
+Production chunks in that earlier run: initial editor App143.79kB/43.31gzip; shared React/runtime219.42kB/68.54gzip; deferred CodeMirror394.83kB/134.40gzip; deferred AST importer563.45kB/131.08gzip. These are individual chunks, not total initial download. The importer500kB warning remains visible and its threshold is unchanged. [Verification](VERIFICATION.md) records the source comparison and test boundaries.
 
 ## Historical baseline — 14 October 2026
 

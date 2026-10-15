@@ -28,6 +28,7 @@ Optional: copy .env.example to .env and configure it privately. Names: PORT, STU
 - Shared catalog: frames, text, buttons, fields, selects, tabs, badges, tables and detail panels. Fictional tickets support working search, filtering, selection, assignment/status, activity and loading/empty/error/retry states.
 - Babel AST import and deterministic generation for the [supported TSX subset](docs/SUPPORTED_CODE.md), stable identities/locations and inspected revision-aware changes. Invalid drafts retain the last valid preview. Outside handwritten source is recoverable text and is not executed in Studio/export.
 - Server-issued pseudonymous sessions, ownership/editor/viewer permissions, invitations, Yjs collaboration/presence, conditional field merging, offline queues/reconnect, SQLite persistence, immutable versions and inspected restore. HTTP/WebSocket permission changes are enforced on live connections and reconnects. See [collaboration](docs/COLLABORATION.md).
+- Strict configurable [demo capacity](docs/DEMO_LIMITS.md): project/owner/version/history bounds, SQLite logical-page limit, live-connection limits and persistent UTC-day AI attempt/concurrency controls. Existing work is retained at count limits; no automatic pruning or deletion. These controls do not replace ingress/volume/provider spending policies on an actual host.
 - A real server-side OpenAI Responses adapter, bounded structured operation proposals, explicit grouped review, dependency/permission/revision checks, cancellation/timeouts and non-live evaluations. **Live provider inference, schema acceptance and model quality remain unverified without application configuration.** Fixtures are tests only.
 - Complete React/TypeScript ZIP exports with the shared runtime, assets/tokens, exact dependencies/transitive lockfile and setup README. A [verified example](docs/export-example.zip) can run independently of Studio.
 
@@ -49,7 +50,7 @@ npm run benchmark
 npm run benchmark:browser
 ```
 
-The 15 October2026 usability pass passed236 unit/integration tests, lint/typecheck/build and23 production browser tests. After the final compact phone-guide and initial phone-preview refinements, the five affected browser checks passed again. Snapshot checks and the historical clean independent export verification are distinguished in [verification](docs/VERIFICATION.md). The browser suite owns isolated4183; browser benchmark owns4188 and requires a fresh build. Raw logs/browser state/databases are not distributed. [Performance](docs/PERFORMANCE.md) gives exact fixtures, hardware, budgets and observed timings; browser measurements include automation/network/DOM observation. The deferred AST importer still emits its bundle-size warning.
+The latest15 October2026 capacity pass passed302 unit/integration tests, lint/typecheck/build and all23 production browser tests on the final source. The preceding usability pass and historical clean independent export verification are distinguished in [verification](docs/VERIFICATION.md). The browser suite owns isolated4183; browser benchmark owns4188 and requires a fresh build. Raw logs/browser state/databases are not distributed. [Performance](docs/PERFORMANCE.md) gives exact fixtures, hardware, budgets and observed timings; browser measurements include automation/network/DOM observation. The deferred AST importer still emits its bundle-size warning.
 
 ## Hosting and recovery
 
@@ -58,7 +59,7 @@ npm run build
 npm start
 ```
 
-Full Studio requires a Node HTTP/WebSocket service and writable persistent SQLite storage. A static GitHub Pages deployment cannot run its backend. Startup uses tsx, so keep development dependencies installed. Node24 SQLite is experimental; the warning is documented. One writable process is supported. No full-backend external deployment has been performed. [Hosting](docs/HOSTING.md) explains how to keep the existing GitHub.io portfolio separate and link source/case study before a hosted demo exists.
+Full Studio requires a Node HTTP/WebSocket service and writable persistent SQLite storage. A static GitHub Pages deployment cannot run its backend. Startup uses tsx, so keep development dependencies installed. Node24 SQLite is experimental; the warning is documented. One writable process is supported. Binding outside loopback requires an exact STUDIO_ORIGIN; review the capacity names in .env.example and [demo limits](docs/DEMO_LIMITS.md). SQLite schema2 additively migrates existing schema1 data; the application document remains schema1. No full-backend external deployment has been performed. [Hosting](docs/HOSTING.md) explains how to keep the existing GitHub.io portfolio separate and link source/case study before a hosted demo exists.
 
 Server data defaults to .studio-data; browser drafts/queues use IndexedDB. Workspace guide → Download project recovery preserves browser work for manual reconciliation. Stop Studio before copying the full server data directory and SQLite sidecars. [Runbook](docs/RUNBOOK.md) includes reset, export and private backup/restore instructions. Local files/commits are not an external backup.
 

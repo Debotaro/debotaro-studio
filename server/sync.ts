@@ -42,10 +42,13 @@ export class SyncEngine {
     const applied={...envelope,baseRevision:before.revision};
     const after=applyOperations(before,applied);
     // Persist first using a candidate CRDT; no room mutation if SQLite fails.
-    const candidate=new Y.Doc();Y.applyUpdate(candidate,Y.encodeStateAsUpdate(this.room(projectId)));
-    candidate.transact(()=>candidate.getMap('studio').set('document',serializeDocument(after)),user.id);
-    const state=Y.encodeStateAsUpdate(candidate);this.store.writeDocument(after,state,user,applied,before);
-    Y.applyUpdate(this.room(projectId),state);candidate.destroy();return after;
+    const candidate=new Y.Doc();
+    try{
+      Y.applyUpdate(candidate,Y.encodeStateAsUpdate(this.room(projectId)));
+      candidate.transact(()=>candidate.getMap('studio').set('document',serializeDocument(after)),user.id);
+      const state=Y.encodeStateAsUpdate(candidate);this.store.writeDocument(after,state,user,applied,before);
+      Y.applyUpdate(this.room(projectId),state);return after;
+    }finally{candidate.destroy();}
   }
   undo(user:User,projectId:string){
     const row=this.store.db.prepare('SELECT * FROM history WHERE project_id=? AND user_id=? AND undone=0 ORDER BY revision DESC LIMIT 1').get(projectId,user.id);

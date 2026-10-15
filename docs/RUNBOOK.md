@@ -14,6 +14,10 @@ Open http://localhost:4173. One process serves HTTP/WebSockets and Vite. Choose 
 
 Optional local environment file: Copy-Item .env.example .env. Names only: PORT, STUDIO_DATA_DIR, STUDIO_HOST, STUDIO_ORIGIN, OPENAI_API_KEY, OPENAI_MODEL. Never commit actual secrets. The default binding is loopback; exact origin/host spelling must match cookies and origin checks.
 
+Binding outside loopback requires an explicit STUDIO_ORIGIN with an exact HTTP(S) origin and no credentials/path/query/trailing slash. It does not configure HTTPS for you. Capacity names in .env.example: STUDIO_MAX_DATABASE_MB, STUDIO_MAX_PROJECTS, STUDIO_MAX_PROJECTS_PER_OWNER, STUDIO_MAX_VERSIONS, STUDIO_MAX_HISTORY, STUDIO_MAX_CONNECTIONS, STUDIO_MAX_CONNECTIONS_PER_USER, STUDIO_AI_DAILY_REQUESTS, STUDIO_AI_USER_DAILY_REQUESTS, STUDIO_AI_CONCURRENT. Values are decimal integers; invalid values stop startup. See [DEMO_LIMITS](DEMO_LIMITS.md) for ranges/defaults.
+
+SQLite schema2 additively migrates schema1 on startup; the application-document schema remains1. Back up the complete stopped data directory before upgrading. No automatic pruning/TTL/reset deletes existing work. At a project/version/history cap, open or export saved work and preserve browser recovery before requesting increased capacity. At storage capacity, stop Studio and back up the full directory/remaining sidecars before reviewing available volume space or restoring a verified separate backup. Do not delete data or bypass validation to hide the error. The logical-page limit excludes WAL/temp files; actual host volume/ingress policy is separate.
+
 ## Verification commands
 
 ```powershell
@@ -87,3 +91,5 @@ For external data set STUDIO_DATA_DIR to the restored copy. Verify projects/role
 ## Pending live-provider checks
 
 Privately configure OPENAI_API_KEY and explicit OPENAI_MODEL for a model supporting strict structured Responses output; restart. Request the assignment-panel example, inspect transmission disclosure, reject one real proposal, then request/accept a dependency-valid subset and undo. Verify real cancellation/timeout/refusal/malformed/stale output, revoked permission during inference and inaccessible-resource attempts. Record sanitized model/source/time/results, never key values. These checks were not run without application configuration; fixtures do not satisfy them. [VERIFICATION](VERIFICATION.md) states current evidence.
+
+Choose global/user UTC-day attempt limits and concurrency before using a hosted key; zero daily allowance disables proposals. Failed/cancelled attempts retain their reservation and counts survive restart. Request counts are not a monetary guarantee: configure provider-side spending controls separately. Never disclose key values in commands, captured output or browser messages.

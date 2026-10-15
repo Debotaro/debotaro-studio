@@ -9,11 +9,11 @@ import type { Operation, OperationEnvelope, StudioDocument, User } from '../../s
 import type { Submission } from '../../server/sync';
 
 export type RunningStudio = Awaited<ReturnType<typeof startStudio>>;
-export async function startStudio(directory?: string) {
+export async function startStudio(directory?: string, options: Omit<Parameters<typeof createStudioServer>[0], 'directory'> = {}) {
   const parent = resolve('artifacts', 'server-tests');
   mkdirSync(parent, { recursive: true });
   const target = directory ?? mkdtempSync(join(parent, 'test-'));
-  const studio = createStudioServer({ directory: target });
+  const studio = createStudioServer({ ...options, directory: target });
   await new Promise<void>(done => studio.server.listen(0, '127.0.0.1', done));
   const port = (studio.server.address() as AddressInfo).port;
   return { ...studio, directory: target, base: `http://127.0.0.1:${port}`, wsBase: `ws://127.0.0.1:${port}` };

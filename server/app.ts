@@ -9,13 +9,15 @@ import { generateProject } from '../src/export/project';
 import type { OperationEnvelope, User } from '../src/core/types';
 import { Store } from './store';
 import { SyncEngine, type Submission } from './sync';
-import { aiStatus, proposeChanges, selectedOperations } from './ai';
+import { aiStatus, AIError, buildAIContext, proposeChanges, selectedOperations } from './ai';
+import { LimitError, resolveDemoLimits, type DemoLimits } from './limits';
 
 const identity = z.object({name:z.string().trim().min(1).max(60)}).strict();
 const invitation = z.object({token:z.string().regex(/^[a-f0-9]{48}$/),name:z.string().trim().min(1).max(60)}).strict();
 const submissionSchema = z.object({envelope:z.object({id:z.string().uuid(),projectId:z.string().min(1).max(100),baseRevision:z.number().int().min(0),label:z.string().min(1).max(160),operations:z.array(z.unknown()).min(1).max(100)}).strict(),expected:z.record(z.string().max(200),z.string().max(100000)).optional(),strict:z.boolean().optional()}).strict();
-export function createStudioServer(options:{directory:string;origin?:string;allowDevSocket?:boolean}) {
-  const store=new Store(options.directory), engine=new SyncEngine(store);
+export function createStudioServer(options:{directory:string;origin?:string;allowDevSocket?:boolean;limits?:Partial<DemoLimits>;now?:()=>number}) {
+  const limits=resolveDemoLimits(options.limits),store=new Store(options.directory,limits), engine=new SyncEngine(store);
+  let activeAI=0;
   const app=express();app.disable('x-powered-by');app.use(express.json({limit:'2mb'}));
   const server=createServer(app);const wss=new WebSocketServer({noServer:true,maxPayload:2*1024*1024});
   const peers=new Map<WebSocket,{user:User;projectId:string;selection:string|null;sessionToken:string}>();
@@ -35,8 +37,8 @@ export function createStudioServer(options:{directory:string;origin?:string;allo
   const broadcast=(projectId:string,opId?:string)=>{const state=engine.state(projectId);for(const[ws,p]of peers)if(p.projectId===projectId){if(authorized(p))send(ws,{type:'state',state,opId});else ws.close(4003,'Access revoked or session expired');}};
   app.get('/api/health',(_req,res)=>res.json({ok:true}));
   app.get('/api/session',(req,res)=>{const user=session(req);res.json({user,projects:user?store.projects(user.id):[]});});
-  app.post('/api/demo',(req,res)=>{const body=identity.parse(req.body);const user=session(req)??store.createUser(body.name);if(!session(req))cookie(res,store.createSession(user));const document=createStarterDocument(randomUUID());store.createProject(document,user);res.status(201).json({user,document,role:'owner'});});
-  app.post('/api/join',(req,res)=>{const body=invitation.parse(req.body),user=session(req)??store.createUser(body.name);const projectId=store.join(body.token,user);if(!session(req))cookie(res,store.createSession(user));res.json({user,document:store.readDocument(projectId),role:store.role(projectId,user.id)});});
+  app.post('/api/demo',(req,res)=>{const body=identity.parse(req.body),existing=session(req);const result=store.transaction(()=>{const user=existing??store.createUser(body.name),document=createStarterDocument(randomUUID());store.createProject(document,user);return{user,document,token:existing?null:store.createSession(user)};});if(result.token)cookie(res,result.token);res.status(201).json({user:result.user,document:result.document,role:'owner'});});
+  app.post('/api/join',(req,res)=>{const body=invitation.parse(req.body),existing=session(req);const result=store.transaction(()=>{const user=existing??store.createUser(body.name),projectId=store.join(body.token,user);return{user,projectId,document:store.readDocument(projectId),token:existing?null:store.createSession(user)};});if(result.token)cookie(res,result.token);res.json({user:result.user,document:result.document,role:store.role(result.projectId,result.user.id)});});
   app.get('/api/projects/:id',(req,res)=>{const user=access(req);res.json({document:store.readDocument(String(req.params.id)),role:store.role(String(req.params.id),user.id)});});
   app.post('/api/projects/:id/operations',(req,res)=>{const user=access(req,true),input=submissionSchema.parse(req.body)as Submission;const doc=engine.submit(user,String(req.params.id),input);broadcast(doc.id,input.envelope.id);res.json({document:doc});});
   app.post('/api/projects/:id/undo',(req,res)=>{const result=engine.undo(access(req,true),String(req.params.id));broadcast(result.document.id);res.json(result);});
@@ -52,9 +54,13 @@ export function createStudioServer(options:{directory:string;origin?:string;allo
   app.post('/api/projects/:id/ai/propose',async(req,res)=>{
     const user=access(req,true),id=String(req.params.id);const{prompt,baseRevision}=z.object({prompt:z.string().trim().min(1).max(4000),baseRevision:z.number().int().min(0)}).strict().parse(req.body);
     const doc=store.readDocument(id);if(doc.revision!==baseRevision)throw new Error('Project changed. Request a proposal using the current design.');
+    if(!aiStatus().available)throw new AIError('Live AI is unavailable. Configure server OPENAI_API_KEY and OPENAI_MODEL; editing and export remain available.', 'AI_UNAVAILABLE', 503);
+    buildAIContext(doc,prompt);
+    if(activeAI>=limits.aiConcurrent)throw new LimitError('The demo AI assistant is busy. Try again when the current proposal finishes; editing and export remain available.', 'AI_BUSY');
+    store.reserveAI(user.id,options.now?.()??Date.now());activeAI++;
     const controller=new AbortController();const cancelled=()=>{if(!res.writableEnded)controller.abort();};res.on('close',cancelled);
     try{const proposal=await proposeChanges({document:doc,prompt,signal:controller.signal,role:store.role(id,user.id)!});access(req,true);if(store.readDocument(id).revision!==baseRevision)throw new Error('Project changed while the model was responding. Request a new proposal.');res.json(proposal);}
-    finally{res.off('close',cancelled);}
+    finally{activeAI--;res.off('close',cancelled);}
   });
   app.post('/api/projects/:id/ai/apply',(req,res)=>{
     const user=access(req,true),id=String(req.params.id);const{proposal,groups}=z.object({proposal:z.unknown(),groups:z.array(z.string().max(80)).min(1).max(12)}).strict().parse(req.body);
@@ -62,12 +68,13 @@ export function createStudioServer(options:{directory:string;origin?:string;allo
     const result=engine.submit(user,id,{envelope:{id:randomUUID(),projectId:id,baseRevision:doc.revision,label:'Reviewed AI proposal',operations},strict:true});broadcast(id);res.json({document:result});
   });
   app.use('/api',(_req,res)=>res.status(404).json({error:'API resource not found'}));
-  app.use((error:unknown,_req:Request,res:Response,_next:NextFunction)=>{const e=error as Error&{status?:number};res.status(e.status??400).json({error:e instanceof z.ZodError?'Request does not match the allowed schema':e.message||'Request failed'});});
+  app.use((error:unknown,_req:Request,res:Response,_next:NextFunction)=>{const original=error as Error&{errcode?:number};const e=(original?.errcode===13?new LimitError('Demo storage capacity is reached. Saved work is retained; ask the host to increase storage or restore a verified backup.', 'STORAGE_CAPACITY', 507):error) as Error&{status?:number;code?:string};res.status(e.status??400).json({error:e instanceof z.ZodError?'Request does not match the allowed schema':e.message||'Request failed',...(e instanceof LimitError?{code:e.code}:{})});});
   server.on('upgrade',(req,socket,head)=>{
     const url=new URL(req.url??'/',`http://${req.headers.host}`),user=store.userForSession(tokenFrom(req));const projectId=url.searchParams.get('projectId')??'';
     const allowedOrigin=options.origin??`http://${req.headers.host}`;
     if(options.allowDevSocket&&url.pathname==='/__vite/'&&['vite-hmr','vite-ping'].includes(String(req.headers['sec-websocket-protocol'])))return;
     if(url.pathname!=='/collaborate'||req.headers.origin!==allowedOrigin||!user||!store.role(projectId,user.id)){socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');socket.destroy();return;}
+    if(peers.size>=limits.connections||[...peers.values()].filter(peer=>peer.user.id===user.id).length>=limits.connectionsPerUser){socket.write('HTTP/1.1 429 Too Many Requests\r\nConnection: close\r\n\r\n');socket.destroy();return;}
     let initialState:string;
     try{initialState=engine.state(projectId);}catch{socket.write('HTTP/1.1 503 Service Unavailable\r\n\r\n');socket.destroy();return;}
     wss.handleUpgrade(req,socket,head,ws=>{

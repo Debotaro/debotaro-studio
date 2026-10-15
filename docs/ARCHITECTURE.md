@@ -1,4 +1,4 @@
-# Implemented architecture — 2026-10-14
+# Implemented architecture — updated 15 October 2026
 
 Independent application source; the existing portfolio is a separate project. React19.3/Vite8 SPA, Node24.13 Express5 HTTP/WebSocket service, built-in experimental SQLite. Vite middleware in development; same service serves dist plus public screenshot/assets in production. Installed versions: docs/DEPENDENCIES.md.
 
@@ -9,9 +9,10 @@ Independent application source; the existing portfolio is a separate project. Re
 - src/runtime: shared catalog, safe state/events/conditions, local abortable fictional-ticket connector, filters/forms/selection/assignment/load/error/empty/retry/activity. Responsive effective layouts and primitive/semantic color+numeric aliases. Application state is distinct from Studio design state; no live customer connector.
 - src/editor: layer/palette/canvas/inspector/CodeMirror/review/history/presence/share/AI UI, IndexedDB snapshots/offline queues/drafts, sandbox preview. Initial design emits code through pure generator; AST and CodeMirror load on demand. Saved outside regions are AST-reviewed on recovery; corrupt drafts remain recoverable.
 - server: Store owns SQLite users/session hashes/projects/members/invites/history/immutable versions; SyncEngine validates ordered typed operations before persisting canonical+causalYjs state. Express/WS enforce session, origin, membership and roles. docs/COLLABORATION.md details conflicts/undo/reconnect/deletion.
+- Server capacity: server/limits.ts normalizes strict immutable policy/environment values. Store schema2 additively adds ai_usage with one mutable UTC-day bucket per user/global scope; no prompt/request content is stored. Logical database pages and project/owner/version/history caps reject writes without pruning. Demo/join identity/session changes share the project/membership transaction. Authorized AI requests reserve persistent allowances and acquire a process-local concurrency gate; authorized WebSocket upgrades check live total/user capacity before materializing CRDT state. See [DEMO_LIMITS](DEMO_LIMITS.md). Application documents remain schema1.
 - server/ai: explicit environment provider/model adapter, minimized context, strict structured operation proposals, timeout/cancel/zero-retry handling, dependency-aware subset validation. No automatic application; live provider verification blocked absent configuration.
 - src/export: validated fresh TSX plus copied runtime/core source/tokens/assets/deps/pruned exact lockfile and README; custom source text separate. scripts/verify-export.ts checks actual ZIP/file bytes and clean independent installation/build/browser.
-- src/portfolio: public case study, actual captures under docs/screenshots. Passive page creates no session/API/WS traffic until Studio CTA. No external publication.
+- src/portfolio: public case study, actual captures under docs/screenshots. Passive page creates no session/API/WS traffic until Studio CTA. Source and narrative are published on GitHub; the full backend has not been externally hosted.
 
 Module changes should preserve shared contracts and be verified through integration tests.
 
@@ -42,6 +43,8 @@ Visual edits → typed operation envelope → optimistic queued browser document
 Server startup rejects future/corrupt/incompatible snapshots/causal state while retaining originals. Browser retains invalid/incompatible code/offline records for download; explicit discard archives source. Field-conditional actor undo protects unrelated changes; immutable version restore is inspected and creates a new revision. Browser reload/server restart and adversarial HTTP/WS cases have local evidence in VERIFICATION; host operations remain unverified.
 
 Preview renders only validated IR through trusted catalog code in iframe sandbox=allow-scripts (opaque origin). postMessage verifies sender/channel/type/payload. No cookies/API keys/imported executable code enter preview. Public built assets permit opaque-origin loading; protected APIs have no public CORS header. Exported applications do not depend on Studio privileges. Sessions are HttpOnly/SameSite/secure on configured HTTPS; pseudonymous demo identity is not verified-account recovery. One writable server process/local SQLite; no distributed deployment implemented.
+
+Capacity refusals preserve existing documents/history/versions and use actionable errors. SQLite_FULL handling preserves automatic rollback errors; a failed candidate Yjs state never replaces the canonical room. There is no automatic retention deletion. The main-database page cap is not a whole-disk/WAL/CPU quota, and AI attempt limits do not guarantee a monetary spend. Non-loopback startup requires an exact explicit origin; HTTPS/proxy/volume/ingress configuration remains host-specific.
 
 ## Planned boundaries
 
