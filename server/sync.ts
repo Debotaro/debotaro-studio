@@ -28,6 +28,9 @@ export class SyncEngine {
   }
   state(projectId:string){return Buffer.from(Y.encodeStateAsUpdate(this.room(projectId))).toString('base64');}
   submit(user:User,projectId:string,input:Submission){
+    return this.submitChange(user,projectId,input);
+  }
+  private submitChange(user:User,projectId:string,input:Submission,undoHistoryId?:string){
     const role=this.store.role(projectId,user.id); if(role!=='owner'&&role!=='editor') throw new Error('Editing permission required');
     const envelope=input.envelope;
     if(envelope.projectId!==projectId) throw new Error('Project identity mismatch');
@@ -46,7 +49,7 @@ export class SyncEngine {
     try{
       Y.applyUpdate(candidate,Y.encodeStateAsUpdate(this.room(projectId)));
       candidate.transact(()=>candidate.getMap('studio').set('document',serializeDocument(after)),user.id);
-      const state=Y.encodeStateAsUpdate(candidate);this.store.writeDocument(after,state,user,applied,before);
+      const state=Y.encodeStateAsUpdate(candidate);this.store.writeDocument(after,state,user,applied,before,undoHistoryId);
       Y.applyUpdate(this.room(projectId),state);return after;
     }finally{candidate.destroy();}
   }
@@ -76,8 +79,7 @@ export class SyncEngine {
       if(current.revision!==after.revision)throw new Error('Undo conflict: a structural change followed this edit. Inspect history before restoring.');
       inverses.push({type:'replace',document:{...before,revision:current.revision}});
     }
-    const doc=this.submit(user,projectId,{envelope:{id:randomUUID(),projectId,baseRevision:current.revision,label:`Undo: ${row.label}`,operations:inverses},strict:true});
-    this.store.db.prepare('UPDATE history SET undone=1 WHERE id=? OR (project_id=? AND revision=?)').run(row.id,projectId,doc.revision);
+    const doc=this.submitChange(user,projectId,{envelope:{id:randomUUID(),projectId,baseRevision:current.revision,label:`Undo: ${row.label}`,operations:inverses},strict:true},String(row.id));
     return {document:doc,redoOperations:original.operations};
   }
   destroy(){for(const room of this.rooms.values())room.destroy();this.rooms.clear();}

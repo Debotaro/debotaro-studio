@@ -78,11 +78,16 @@ export class Store {
     try { return migrateDocument(JSON.parse(String(row.document))); }
     catch { throw new Error('Saved project is corrupt or incompatible. Original data retained; restore a verified backup.'); }
   }
-  writeDocument(doc: StudioDocument, ystate: Uint8Array, user: User, envelope: OperationEnvelope, before: StudioDocument) {
+  writeDocument(doc: StudioDocument, ystate: Uint8Array, user: User, envelope: OperationEnvelope, before: StudioDocument, undoHistoryId?: string) {
     this.transaction(() => {
       if(Number(this.db.prepare('SELECT COUNT(*) AS count FROM history WHERE project_id=?').get(doc.id)?.count) >= this.limits.historyPerProject) throw new LimitError('This project has reached its saved-change limit. Your work is retained; export it or ask the host to increase capacity.');
       this.db.prepare('UPDATE projects SET document=?,ystate=? WHERE id=?').run(serializeDocument(doc), ystate, doc.id);
       this.db.prepare('INSERT INTO history(id,project_id,user_id,label,revision,before_doc,after_doc,envelope,created) VALUES(?,?,?,?,?,?,?,?,?)').run(envelope.id, doc.id, user.id, envelope.label, doc.revision, serializeDocument(before), serializeDocument(doc), JSON.stringify(envelope), new Date().toISOString());
+      if(undoHistoryId){
+        // Commit the inverse and its bookkeeping together before publishing candidate Yjs state.
+        const marked=this.db.prepare('UPDATE history SET undone=1 WHERE project_id=? AND user_id=? AND (id=? OR id=?)').run(doc.id,user.id,undoHistoryId,envelope.id);
+        if(Number(marked.changes)!==2)throw new Error('Undo history changed. No changes were applied.');
+      }
     });
   }
   saveVersion(doc: StudioDocument, actor: string, label: string): Version {
@@ -122,11 +127,13 @@ export class Store {
   }
   members(projectId: string) { return this.db.prepare('SELECT u.id,u.name,m.role FROM members m JOIN users u ON u.id=m.user_id WHERE m.project_id=?').all(projectId); }
   setRole(projectId: string,userId: string,role: 'editor'|'viewer'|null) {
-    if (this.role(projectId,userId)==='owner') throw new Error('Owner permissions cannot be changed here');
-    if (role) this.db.prepare('UPDATE members SET role=? WHERE project_id=? AND user_id=?').run(role,projectId,userId);
-    else this.db.prepare('DELETE FROM members WHERE project_id=? AND user_id=?').run(projectId,userId);
-    // Outstanding capability links must not resurrect access that an owner revoked.
-    this.db.prepare('DELETE FROM invitations WHERE project_id=?').run(projectId);
+    this.transaction(() => {
+      if (this.role(projectId,userId)==='owner') throw new Error('Owner permissions cannot be changed here');
+      if (role) this.db.prepare('UPDATE members SET role=? WHERE project_id=? AND user_id=?').run(role,projectId,userId);
+      else this.db.prepare('DELETE FROM members WHERE project_id=? AND user_id=?').run(projectId,userId);
+      // A failed invitation invalidation must also roll back the membership change.
+      this.db.prepare('DELETE FROM invitations WHERE project_id=?').run(projectId);
+    });
   }
   transaction<T>(fn: () => T): T {
     if(this.transactionDepth>0)return fn();
