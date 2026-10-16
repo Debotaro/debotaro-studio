@@ -1,0 +1,4 @@
+# Keep captured verification JSON bytes identical across platform checkouts.
+docs/*verification*.json -text
+*.png binary
+*.zip binary

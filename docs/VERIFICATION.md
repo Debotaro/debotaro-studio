@@ -1,5 +1,7 @@
 # Verification scope and provenance
 
+The [16 October 2026 current verification record](CURRENT_VERIFICATION.md) supersedes the current test totals below: 309 unit/integration tests and all 23 production browser checks passed after the local atomicity, disclosure and export-verifier corrections, together with a new clean independent export. The earlier checkpoints below remain historical provenance. Hosted CI and live provider inference are still unverified for the reviewed Studio patch.
+
 This selective public source snapshot was prepared15 October2026 from the locally verified product and updated with the usability pass described below. Current core, compiler, runtime, editor, server and test source is retained; the only source adaptation relative to that current product is case-study narrative pointing to this public document. Package root license metadata and public documentation were adapted. Private prompts, implementation notes, database/browser state and raw logs are not part of this snapshot.
 
 ## Historical executed evidence —14 October2026

@@ -1,0 +1,87 @@
+{
+  "client_date": "2026-10-16",
+  "status": "local_consolidated_checks_passed",
+  "public_base_commit": "09a632b45e533eed86b291dd08506d85c4d8a04f",
+  "local_parent_commit_during_gate": "129e5d4909d6f91e9492c7547566af0ab1e4ed96",
+  "source_context": "Consolidated final behavioral source and tests, including pending local review changes identified by the exact hashes below. This is not a hosted CI or public deployment result.",
+  "environment": {
+    "node": "v24.13.0",
+    "npm": "11.6.2",
+    "platform": "win32",
+    "live_provider_configuration": "Explicitly disabled in the validation process; provider tests use fixtures"
+  },
+  "lint": "passed",
+  "typecheck": "passed",
+  "production_build": "passed",
+  "unit_integration": {
+    "passed": 309,
+    "files": 22,
+    "duration_seconds": 2.97,
+    "new_regressions": {
+      "sqlite_atomicity": 5,
+      "export_environment_boundary": 2
+    }
+  },
+  "production_browser": {
+    "passed": 23,
+    "duration_seconds": 55.7,
+    "browser": "Chromium",
+    "actual_local_http_websocket_sqlite": true
+  },
+  "independent_export": {
+    "status": "pass",
+    "tracked_source_hashes_rechecked": 20,
+    "generated_files": 22,
+    "browser_interaction_groups": 12,
+    "numeric_token_assertions": true,
+    "zip_sha256": "e798dd7766bdf99972a0665e543a8f69a88f9a5eeea46965879cd20574daf41d",
+    "preview_stopped": true,
+    "report": "docs/export-verification-2026-10-16.json"
+  },
+  "source_sha256": {
+    "package-lock.json": "43af179ac470fd474c714e55f06500eda41a4b270a0003618700f35ad8b77b8d",
+    "package.json": "91f30f883f7664b78c11a8ebdddb60a63ca4859f4ed2dd2171a3e2123d2a1f28",
+    "scripts/verify-export.ts": "80e51fffe2a8a6756ef617261cf9590a07e265fba8aefe1333346d07dc835556",
+    "src/compiler/boundary.ts": "866637637d984b286407e0f73a014f0a887085503fe71bfd38c4c760d6baf871",
+    "src/compiler/compiler.ts": "d6a96fce373650d2f4752b72f5fe1fd96f2ee3a8d8d06360beb28499515efdce",
+    "src/compiler/generate.ts": "339606f003fc28316ac0cbfbc121ae144ca70caca016cca2694ae53fc590fbfe",
+    "src/compiler/importer.ts": "df7eb370f73faf65ca857f28a39feb7e62c4d7c19b828e374f8bff668e7f4ca0",
+    "src/compiler/index.ts": "92eee0ea6906b212b8ebb97c059852eed9a39d830a5a088e1ed1620fdc286241",
+    "src/core/document.ts": "eece93bbafb0fbd2a526eaaafdadadfb83b851d5a02020a2dac8b100f6dc0d10",
+    "src/core/preconditions.ts": "c714a5c394244efa060cafcb09222a31e0c9fc8182402d9d61309e1779701a99",
+    "src/core/starter.ts": "62007f3ea997b80be6c3b9fa0750639995719a10215d831b07ea5d8dc78acc5e",
+    "src/core/tokens.ts": "350044d60b83ba72a21139a91e3f18c77f94ddeafb7642085d44e4a7d9ca118b",
+    "src/core/types.ts": "c81d2c9fdcf9baea86e73e6db3a4241c9da94a4d6a29bf14fd749e61557981c4",
+    "src/export/project.ts": "35c42e5e8403ef18b377b0f071cf7f6d296c80860f1adc3bca3ab2a7de3a7cb6",
+    "src/runtime/StudioRuntime.tsx": "6a1903ce6fb8d7024f0a96cebe186b47d0a2531129d1c32a666c44cffd5984f3",
+    "src/runtime/connector.ts": "957906ae65ff195a1524a473f2efe9d900f814ad545ca599c1ea5e77a52bbb21",
+    "src/runtime/runtime.css": "91216c25940fa1b5e3e65faa6083898d7c5c287ac804228c64baa39432ed7065",
+    "src/runtime/state.ts": "ff1b97421a2c03348eacc2d6c4aed3875b285cbea11836fa2e8d5cc3a5b1ff45",
+    "tests/export/verify-interactions.ts": "ea45ff22b4fcb353effe23b37cf277dd9938fc6640afd0e09e452f76e146f37b",
+    "tsconfig.json": "4f45a2983a86a9f76d44b52bd837cc103d9ad699786c25327109856665314de5",
+    "server/store.ts": "d448314a75a9724ed58e85720f454580b0efcaaae9ad3d641cd4ca31d79ff59c",
+    "server/sync.ts": "8239181d51f6ec85d09a6460c5ad13524aa9d53d84dae395771dda57394f5cb1",
+    "src/editor/App.tsx": "01c01722d0440aa5fc3461596f131b4d255a222978d22c2e6df1976baefe1753",
+    "tests/server/atomicity.test.ts": "41fad58a583ef84aac49aa2daa35825e72ae91b6cba51062b471266aa29f5284",
+    "tests/export/master.test.ts": "f6d7121ad1ba5f254b4b79e812cdf81779efbab34a5c886ec51007c4a45e836d",
+    ".github/workflows/ci.yml": "cf6888a97c47d182825f4517d39736e3eb12ee5639df68900265577d6704eae6",
+    "playwright.config.ts": "a12e360be7a24ef998103580f4bf0e9b59eba5cf547652b6964fdec080163f28",
+    ".gitattributes": "d702870f1c897fb3dfaa49d255fbea2a0f41c5cf796e142e8fc1e41b68659b96"
+  },
+  "warnings_retained": [
+    "Node 24 SQLite experimental warning",
+    "Deferred AST importer chunk 563.45 kB minified"
+  ],
+  "hosted_ci_executed": false,
+  "reviewed_patch_published": false,
+  "public_studio_backend_deployed": false,
+  "live_provider_inference_verified": false,
+  "benchmarks_rerun_for_patch": false,
+  "limitations": [
+    "Pseudonymous demo sessions rather than verified account identity",
+    "Fictional local test data and explicit SQLite fault injection",
+    "No claim of production throughput, availability, customer impact or full accessibility certification",
+    "Independent export proof applies to the tested starter and its recorded source hashes"
+  ],
+  "source_hash_scope": "Exact local Windows worktree bytes with core.autocrlf=true; text line endings can differ on another platform. Each fresh verifier compares its own start/end bytes."
+}

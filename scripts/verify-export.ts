@@ -76,9 +76,11 @@ async function sourceHashes(): Promise<Record<string, string>> {
 }
 
 /** No application credentials or Studio configuration enter exported processes. */
-function childEnvironment(): NodeJS.ProcessEnv {
-  const allowed = new Set(['PATH', 'SYSTEMROOT', 'WINDIR', 'COMSPEC', 'PATHEXT', 'APPDATA', 'LOCALAPPDATA', 'USERPROFILE', 'HOME', 'HOMEDRIVE', 'HOMEPATH', 'TEMP', 'TMP', 'TMPDIR', 'NPM_CONFIG_CACHE', 'PLAYWRIGHT_BROWSERS_PATH']);
-  return { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => allowed.has(key.toUpperCase()))), NO_COLOR: '1', CI: '1' };
+export function childEnvironment(environment: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  // Preserve an explicitly chosen npm shell for Windows paths containing spaces/&.
+  // Do not broaden this to NPM_CONFIG_*: that namespace can contain auth tokens.
+  const allowed = new Set(['PATH', 'SYSTEMROOT', 'WINDIR', 'COMSPEC', 'PATHEXT', 'APPDATA', 'LOCALAPPDATA', 'USERPROFILE', 'HOME', 'HOMEDRIVE', 'HOMEPATH', 'TEMP', 'TMP', 'TMPDIR', 'NPM_CONFIG_CACHE', 'NPM_CONFIG_SCRIPT_SHELL', 'PLAYWRIGHT_BROWSERS_PATH']);
+  return { ...Object.fromEntries(Object.entries(environment).filter(([key]) => allowed.has(key.toUpperCase()))), NO_COLOR: '1', CI: '1' };
 }
 
 interface CommandResult { command: string[]; directory: string; log: string; startedAt: string; finishedAt: string; exitCode: number | null; signal: string | null }

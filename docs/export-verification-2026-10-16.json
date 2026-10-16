@@ -1,0 +1,126 @@
+{
+  "status": "pass",
+  "started_at_utc": "2026-10-16T14:19:21.252Z",
+  "finished_at_utc": "2026-10-16T14:19:28.149Z",
+  "source_base_revision": "09a632b45e533eed86b291dd08506d85c4d8a04f",
+  "source_context": "Executed locally with the export-runner and its two environment-allowlist regression changes pending a local review commit. Server/editor changes are outside this independent export verification scope.",
+  "source_sha256": {
+    "package-lock.json": "43af179ac470fd474c714e55f06500eda41a4b270a0003618700f35ad8b77b8d",
+    "package.json": "91f30f883f7664b78c11a8ebdddb60a63ca4859f4ed2dd2171a3e2123d2a1f28",
+    "scripts/verify-export.ts": "80e51fffe2a8a6756ef617261cf9590a07e265fba8aefe1333346d07dc835556",
+    "src/compiler/boundary.ts": "866637637d984b286407e0f73a014f0a887085503fe71bfd38c4c760d6baf871",
+    "src/compiler/compiler.ts": "d6a96fce373650d2f4752b72f5fe1fd96f2ee3a8d8d06360beb28499515efdce",
+    "src/compiler/generate.ts": "339606f003fc28316ac0cbfbc121ae144ca70caca016cca2694ae53fc590fbfe",
+    "src/compiler/importer.ts": "df7eb370f73faf65ca857f28a39feb7e62c4d7c19b828e374f8bff668e7f4ca0",
+    "src/compiler/index.ts": "92eee0ea6906b212b8ebb97c059852eed9a39d830a5a088e1ed1620fdc286241",
+    "src/core/document.ts": "eece93bbafb0fbd2a526eaaafdadadfb83b851d5a02020a2dac8b100f6dc0d10",
+    "src/core/preconditions.ts": "c714a5c394244efa060cafcb09222a31e0c9fc8182402d9d61309e1779701a99",
+    "src/core/starter.ts": "62007f3ea997b80be6c3b9fa0750639995719a10215d831b07ea5d8dc78acc5e",
+    "src/core/tokens.ts": "350044d60b83ba72a21139a91e3f18c77f94ddeafb7642085d44e4a7d9ca118b",
+    "src/core/types.ts": "c81d2c9fdcf9baea86e73e6db3a4241c9da94a4d6a29bf14fd749e61557981c4",
+    "src/export/project.ts": "35c42e5e8403ef18b377b0f071cf7f6d296c80860f1adc3bca3ab2a7de3a7cb6",
+    "src/runtime/StudioRuntime.tsx": "6a1903ce6fb8d7024f0a96cebe186b47d0a2531129d1c32a666c44cffd5984f3",
+    "src/runtime/connector.ts": "957906ae65ff195a1524a473f2efe9d900f814ad545ca599c1ea5e77a52bbb21",
+    "src/runtime/runtime.css": "91216c25940fa1b5e3e65faa6083898d7c5c287ac804228c64baa39432ed7065",
+    "src/runtime/state.ts": "ff1b97421a2c03348eacc2d6c4aed3875b285cbea11836fa2e8d5cc3a5b1ff45",
+    "tests/export/verify-interactions.ts": "ea45ff22b4fcb353effe23b37cf277dd9938fc6640afd0e09e452f76e146f37b",
+    "tsconfig.json": "4f45a2983a86a9f76d44b52bd837cc103d9ad699786c25327109856665314de5"
+  },
+  "environment": {
+    "node": "v24.13.0",
+    "npm": "11.6.2",
+    "os": "win32"
+  },
+  "scope": "Current validated fictional starter, generated source ZIP, frozen clean install, typecheck, production build, loopback start and actual independent Chromium interactions. No Studio API/backend/provider dependency.",
+  "commands": [
+    {
+      "step": "frozen_install",
+      "exit_code": 0,
+      "started_at_utc": "2026-10-16T14:19:21.449Z",
+      "finished_at_utc": "2026-10-16T14:19:22.677Z"
+    },
+    {
+      "step": "typecheck",
+      "exit_code": 0,
+      "started_at_utc": "2026-10-16T14:19:22.689Z",
+      "finished_at_utc": "2026-10-16T14:19:24.013Z"
+    },
+    {
+      "step": "production_build",
+      "exit_code": 0,
+      "started_at_utc": "2026-10-16T14:19:24.026Z",
+      "finished_at_utc": "2026-10-16T14:19:26.018Z"
+    },
+    {
+      "step": "independent_chromium_interactions",
+      "exit_code": 0,
+      "started_at_utc": "2026-10-16T14:19:26.610Z",
+      "finished_at_utc": "2026-10-16T14:19:27.994Z"
+    }
+  ],
+  "generated": {
+    "file_count": 22,
+    "archive_bytes": 40314,
+    "archive_sha256": "e798dd7766bdf99972a0665e543a8f69a88f9a5eeea46965879cd20574daf41d",
+    "files_sha256": {
+      "package.json": "0e4bd578247ac925dda1a5f865ee8b147dd85aaed04d857a9208ba731e6d937f",
+      "package-lock.json": "415f7a54169513a704a789293539dec98aa13c938fba47657b3a9dbee6c42298",
+      "tsconfig.json": "302e3cc37e2f6072330210dfe0cf655d2c829a52e6f54c957604c4f6c3fcb863",
+      "vite.config.ts": "6b232f7c866661c8d8401d353bdff2df82870175ad4dde099573af0d6784dc92",
+      "index.html": "80616b03845e61bbd23541a390eccba0a205920f45f489e20656369ab54a9ce4",
+      "src/main.tsx": "cce6e53d696a7cbdf383d6fa5f8b694c3e04e708a2474f0ec61888e68bbde54b",
+      "src/App.tsx": "16aa5fa73bc74126c136ced077559b138f2507823587402bec9dab0b4d3140b4",
+      "src/styles.css": "ae54e7e524bbe9ee0f03a6238ddd89e5a9be2786522e73f8a5bc630a44c3059b",
+      "studio-document.json": "a7b407ea1f83ee614deddb4d2f759ff8f6d06a8c6282987eb555634db43392f7",
+      "tokens.json": "ab5e30a48786716b7054b500c6694ceade24f6b4dea5d08844f44f6b0e65ae1b",
+      ".gitignore": "05fe7a628802f976b8ae34365446aecda0a7bc06c61dbd4bbc9b7b4f02a08b75",
+      "README.md": "35e0dc8a92f05128e03ee424a516819eb4e928aac00f42b5e56e2503433b2ae3",
+      "EXPORT_MANIFEST.json": "5d4003089e173479b1ecc3804be200d24d4970c782b34a6d1ab60886f1fc4f7a",
+      "src/core/types.ts": "c81d2c9fdcf9baea86e73e6db3a4241c9da94a4d6a29bf14fd749e61557981c4",
+      "src/core/tokens.ts": "350044d60b83ba72a21139a91e3f18c77f94ddeafb7642085d44e4a7d9ca118b",
+      "src/runtime/connector.ts": "957906ae65ff195a1524a473f2efe9d900f814ad545ca599c1ea5e77a52bbb21",
+      "src/runtime/runtime.css": "91216c25940fa1b5e3e65faa6083898d7c5c287ac804228c64baa39432ed7065",
+      "src/runtime/state.ts": "ff1b97421a2c03348eacc2d6c4aed3875b285cbea11836fa2e8d5cc3a5b1ff45",
+      "src/runtime/StudioRuntime.tsx": "6a1903ce6fb8d7024f0a96cebe186b47d0a2531129d1c32a666c44cffd5984f3",
+      "recovery/original-studio-code.tsx.txt": "21e83a69610e6407937ff6284bffef8aefcb5cc401c5496c8e75c3b98256ddf0",
+      "recovery/custom-code.txt": "a5fca8fd49ede27a6a57e9aad081c08f15a4027000a429ffff8727ef44c2a7eb",
+      "recovery/custom-code-parts.json": "fff85c2172c5502692131776ededacc2233385c93108c09d7031019e714802a1"
+    },
+    "custom_code": "Plain text recovery only; a throw sentinel would fail browser checks if executed."
+  },
+  "browser": {
+    "status": "pass",
+    "checks": [
+      "six loaded rows",
+      "search",
+      "selection",
+      "assignment",
+      "status",
+      "activity",
+      "empty/clear",
+      "status/assignee filters",
+      "refresh preserves changed ticket",
+      "phone focus/no page overflow",
+      "no browser errors",
+      "no Studio API requests"
+    ],
+    "phone": {
+      "scrollWidth": 390,
+      "viewport": 390
+    },
+    "numeric_tokens_checked": true
+  },
+  "public_example": {
+    "path": "docs/export-example.zip",
+    "sha256": "e798dd7766bdf99972a0665e543a8f69a88f9a5eeea46965879cd20574daf41d",
+    "sourceBytesVerified": true
+  },
+  "preview_stopped": true,
+  "limitations": [
+    "Fictional starter fixture; not a proof for arbitrary generated applications",
+    "No Studio API/backend dependency",
+    "No live provider inference or hosted application deployment",
+    "Local Windows run; new hosted CI workflow not executed"
+  ],
+  "source_hash_scope": "Exact local Windows worktree bytes with core.autocrlf=true; text line endings can differ on another platform. Each fresh verifier compares its own start/end bytes."
+}

@@ -1,0 +1,52 @@
+name: Verify Studio
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source & verification
+    env:
+      STUDIO_TEST_PRODUCTION: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: source & verification
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.13.0'
+          cache: npm
+          cache-dependency-path: source & verification/package-lock.json
+      - name: Preserve the explicit Windows script shell through export verification
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Add-Content -LiteralPath $env:GITHUB_ENV -Value "npm_config_script_shell=$((Get-Process -Id $PID).Path)"
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - run: npm run verify:export
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: verification-${{ matrix.os }}
+          path: |
+            source & verification/playwright-report/
+            source & verification/artifacts/export-verification/*/report.json
+            source & verification/artifacts/export-verification/*/*.log
+            source & verification/artifacts/export-verification/*/browser/report.json
+            source & verification/artifacts/export-verification/*/browser/*.png

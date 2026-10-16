@@ -50,7 +50,11 @@ npm run benchmark
 npm run benchmark:browser
 ```
 
-The latest15 October2026 capacity pass passed302 unit/integration tests, lint/typecheck/build and all23 production browser tests on the final source. The preceding usability pass and historical clean independent export verification are distinguished in [verification](docs/VERIFICATION.md). The browser suite owns isolated4183; browser benchmark owns4188 and requires a fresh build. Raw logs/browser state/databases are not distributed. [Performance](docs/PERFORMANCE.md) gives exact fixtures, hardware, budgets and observed timings; browser measurements include automation/network/DOM observation. The deferred AST importer still emits its bundle-size warning.
+Fresh consolidated verification on 16 October 2026 passed 309 unit/integration tests, lint, typecheck/build and all 23 production browser tests. A new clean independent export also passed frozen install, typecheck, production build and actual Chromium interactions, including the phone layout and absence of Studio API calls. Five new real SQLite fault regressions cover atomic undo bookkeeping and membership/invitation revocation. Two export-runner regressions preserve the explicit Windows npm script shell while proving that provider/npm credentials and Studio settings remain excluded from export subprocesses. See the [current verification record](docs/CURRENT_VERIFICATION.md) for exact scope, source provenance and remaining limits; [historical verification](docs/VERIFICATION.md) retains earlier measurements.
+
+On Windows, a workspace path containing `&` requires an explicitly selected compatible npm script shell, for example `$env:npm_config_script_shell = (Get-Process -Id $PID).Path` from PowerShell 7. This changes only that process environment; the verifier preserves this one allowed setting without forwarding arbitrary npm configuration. The pinned Linux/Windows CI workflow also checks out into a path containing `&`; hosted execution of this new workflow remains pending publication approval.
+
+The browser suite owns isolated4183; browser benchmark owns4188 and requires a fresh build. Raw logs/browser state/databases are not distributed. [Performance](docs/PERFORMANCE.md) gives historical fixtures, hardware, budgets and observed timings; browser measurements include automation/network/DOM observation. The deferred AST importer still emits its bundle-size warning.
 
 ## Hosting and recovery
 
