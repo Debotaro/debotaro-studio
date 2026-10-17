@@ -54,7 +54,7 @@ export function createStudioServer(options:{directory:string;origin?:string;allo
   app.post('/api/projects/:id/ai/propose',async(req,res)=>{
     const user=access(req,true),id=String(req.params.id);const{prompt,baseRevision}=z.object({prompt:z.string().trim().min(1).max(4000),baseRevision:z.number().int().min(0)}).strict().parse(req.body);
     const doc=store.readDocument(id);if(doc.revision!==baseRevision)throw new Error('Project changed. Request a proposal using the current design.');
-    if(!aiStatus().available)throw new AIError('Live AI is unavailable. Configure server OPENAI_API_KEY and OPENAI_MODEL; editing and export remain available.', 'AI_UNAVAILABLE', 503);
+    const availability=aiStatus();if(!availability.available)throw new AIError(`Live AI is unavailable. ${availability.reason??'Editing and export remain available on this host.'}`, 'AI_UNAVAILABLE', 503);
     buildAIContext(doc,prompt);
     if(activeAI>=limits.aiConcurrent)throw new LimitError('The demo AI assistant is busy. Try again when the current proposal finishes; editing and export remain available.', 'AI_BUSY');
     store.reserveAI(user.id,options.now?.()??Date.now());activeAI++;
