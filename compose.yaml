@@ -1,0 +1,44 @@
+services:
+  studio:
+    image: debotaro-studio:local
+    build:
+      context: .
+    init: true
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 768m
+    cpus: 1.0
+    environment:
+      NODE_ENV: production
+      PORT: "4173"
+      STUDIO_HOST: 0.0.0.0
+      STUDIO_DATA_DIR: /data
+      STUDIO_ORIGIN: ${STUDIO_ORIGIN:?Set the exact browser origin, without a trailing slash}
+      # No paid provider is configured by this hosting pack.
+      AI_PROVIDER: disabled
+      OPENAI_API_KEY: ""
+      OPENAI_MODEL: ""
+      STUDIO_AI_DAILY_REQUESTS: "0"
+      STUDIO_AI_USER_DAILY_REQUESTS: "0"
+    ports:
+      # Reachable only by a reverse proxy on this host, or a local browser.
+      - "127.0.0.1:${STUDIO_HTTP_PORT:-4173}:4173"
+    volumes:
+      - studio-data:/data
+    restart: unless-stopped
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  studio-data:

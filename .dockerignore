@@ -1,0 +1,18 @@
+# Allow only build/runtime source. Local data, credentials, browser profiles,
+# historical exports and verification artifacts never enter the build context.
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!vite.config.ts
+!index.html
+!preview.html
+!src/
+!src/**
+!server/
+!server/**
+!public/
+!public/**
+!docs/
+!docs/screenshots/
+!docs/screenshots/**
