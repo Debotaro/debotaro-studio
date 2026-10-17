@@ -1,0 +1,5 @@
+# Official Ollama publisher image, version matched to the local CPU evaluation.
+FROM ollama/ollama:0.40.5@sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241
+ENV HOME=/tmp OLLAMA_MODELS=/models OLLAMA_NO_CLOUD=1
+RUN mkdir /models && chown 1000:1000 /models
+USER 1000:1000

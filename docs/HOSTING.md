@@ -41,7 +41,7 @@ For PowerShell set `$env:STUDIO_ORIGIN='http://localhost:4173'` before running t
 
 The service runs as UID/GID1000, with all Linux capabilities dropped, no-new-privileges, a read-only root and a 64MiB `/tmp` tmpfs. SQLite and its WAL/SHM live in the project-scoped `studio-data` named volume at `/data`, initially owned by UID1000 from the image. A reused or manually created volume must have that ownership; do not make it world-writable to hide an error. CPU, memory, process and log bounds are explicit; the 768MiB service setting is a starting budget, not a load or model-serving measurement. This is one writable Studio process, not a distributed deployment.
 
-`AI_PROVIDER=disabled`, blank paid-provider credentials and zero AI request quotas make the base service an editor/collaboration/export deployment. There is no silent paid fallback. The optional local-model deployment is documented separately after its provider and actual model acceptance checks; the base CI downloads no model and makes no inference requests.
+`AI_PROVIDER=disabled`, blank paid-provider credentials and zero AI request quotas make the base service an editor/collaboration/export deployment. There is no silent paid fallback. The optional local-model overlay below requires an explicit download and separate real acceptance checks; the base CI downloads no model and makes no inference requests.
 
 For a real host, set `STUDIO_ORIGIN` to its exact HTTPS origin and put an HTTPS reverse proxy on the same host in front of the loopback port. Forward WebSocket upgrades at `/collaborate`, preserve the browser Host/Origin and serve the whole origin (no path-prefix rewriting). A proxy running in another container cannot reach this service through its own loopback; use an explicitly configured shared private network and remove the host port if that topology is chosen. Do not expose4173 publicly. TLS is supplied by the proxy, not Compose. Secure cookies are controlled by the explicit HTTPS origin; there is no need to enable broad Express trust-proxy. No Cloudflare tunnel or platform-specific port convention is required.
 
@@ -59,7 +59,32 @@ node scripts/container-smoke.mjs --native
 
 The Docker probe uses a random isolated Compose project, a temporary loopback host port and only fictional fixtures. It checks image UID/root/tmpfs/volume/health restrictions and `node:sqlite`, then the built page, unavailable AI, server-issued HttpOnly/SameSite session, project creation, CSRF/HTTP and WebSocket authentication, cross-project access, an authorized live edit, viewer write denial, immediate live revocation, independent ZIP content, and session/document/permissions/export after restarting the same volume. Cleanup removes only that random probe project's containers and fictional volume. Ordinary deployment commands do not remove the persistent service volume; never run `docker compose down --volumes` on data you need.
 
-Results are written under ignored `artifacts/container-smoke/`. Reports include the exact source commit and whether its checkout was dirty; sessions and invitation secrets are not recorded. `--native` refuses a checkout `.env` and uses an allowlisted child environment. It establishes workflow behavior, not Linux container isolation. Native Windows termination is a process restart check, not a claim about Linux SIGTERM handling. CI runs both OS gates first, then this real Docker probe and uploads its bounded report/log artifact. A green build alone is not a deployed-host acceptance check. Consult [the current workflow](https://github.com/Debotaro/debotaro-studio/actions) for actual results.
+Results are written under ignored `artifacts/container-smoke/`. Reports include the exact source commit and whether its checkout was dirty; sessions and invitation secrets are not recorded. `--native` refuses a checkout `.env` and uses an allowlisted child environment. It establishes workflow behavior, not Linux container isolation. Native Windows termination is a process restart check, not a claim about Linux SIGTERM handling. CI runs both OS gates first, then this real Docker probe on native amd64 and arm64, uploading separate reports/logs. GitHub documents `ubuntu-24.04-arm` as a [free standard runner for public repositories](https://docs.github.com/en/actions/reference/runners/github-hosted-runners). This checks native architecture compatibility without claiming identical Oracle A1 CPU behavior. A green build alone is not a deployed-host acceptance check. Consult [the current workflow](https://github.com/Debotaro/debotaro-studio/actions) for actual results.
+
+## Optional private local model
+
+`compose.local-ai.yaml` adds an opt-in `local-ai` profile and a separate `model-download` job. It pins the official publisher's `ollama/ollama:0.40.5` multi-architecture index to `sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241`. The small derived Dockerfile prepares a UID1000-owned model directory; the runtime remains nonroot with a read-only root, temporary home and persistent model volume. See [Ollama's Docker reference](https://docs.ollama.com/docker).
+
+Studio uses only `http://ollama:11434` on a private network. The Ollama serving service has no published port and only an internal Docker network, with no external route. Cloud features, GPU selection and parallel model execution are disabled. The single-user queue is bounded. The initial CPU-only service budget is two CPUs and 6GiB RAM, separate from Studio; neither that value nor the available VM capacity establishes model latency or successful inference. Review the actual model evaluation and host memory before enabling it for others.
+
+The explicit pull job temporarily has outbound access, but no public port. It must finish and exit before the private serving instance starts; do not run two daemons against the same model volume. The `local-ai` profile alone never starts this download job. Example commands below require Docker and Node on the host, from the repository root. Set the exact browser origin first; `https://studio.example.com` is an example to replace with the actual accepted host, not a deployed URL.
+
+```sh
+export STUDIO_ORIGIN=https://studio.example.com
+# Stop only these services before modifying their shared model store.
+docker compose -f compose.yaml -f compose.local-ai.yaml --profile local-ai stop studio ollama
+# Explicit one-shot outbound download; no paid provider or inference call.
+docker compose -f compose.yaml -f compose.local-ai.yaml --profile model-download run --rm --no-deps --build ollama-pull
+# Start the private serving instance, with no internet route.
+docker compose -f compose.yaml -f compose.local-ai.yaml --profile local-ai up --build -d --no-deps --wait ollama
+node scripts/verify-model-store.mjs
+# Continue only after digest verification, local acceptance and host review.
+docker compose -f compose.yaml -f compose.local-ai.yaml --profile local-ai up --build -d --wait studio
+```
+
+The reviewed tag is `qwen3.5:4b`; its expected registry manifest digest is `d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04`. A tag can change. `verify-model-store.mjs` calls the [private model-list API](https://docs.ollama.com/api/tags) through a one-off Node container, fails closed unless the full digest matches, and prints only model metadata. It performs no inference. Do not expose AI after a mismatch; review and reevaluate any replacement rather than silently accepting the new tag. That metadata check does not prove structured output quality, latency or public-host readiness. The real acceptance scope is recorded separately in `docs/LOCAL_AI.md` once the provider evaluation completes.
+
+`scripts/ollama-container-smoke.mjs` checks only the optional service infrastructure: UID/root/tmpfs/volume/health restrictions, absence of host ports, its sole internal network, private version API and an empty model store. CI runs this on both native architectures after the base runtime test. No model is downloaded or inference requested by these jobs. Configuration availability in the UI remains distinct from an actual model connection and successful inference. The paid OpenAI variables remain blank in both Compose variants; provider failures do not select a paid fallback.
 
 ## Implemented capacity and retention
 

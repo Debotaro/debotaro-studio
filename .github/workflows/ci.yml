@@ -51,10 +51,14 @@ jobs:
             source & verification/artifacts/export-verification/*/browser/report.json
             source & verification/artifacts/export-verification/*/browser/*.png
   container:
-    name: Persistent container runtime
+    name: Persistent container runtime (${{ matrix.os }})
     needs: verify
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -66,8 +70,12 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Build and probe the isolated persistent service
         run: node scripts/container-smoke.mjs
+      - name: Verify optional private model infrastructure without downloading a model
+        run: node scripts/ollama-container-smoke.mjs
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
-          name: container-runtime-verification
-          path: artifacts/container-smoke/
+          name: container-runtime-verification-${{ matrix.os }}
+          path: |
+            artifacts/container-smoke/
+            artifacts/ollama-container-smoke/

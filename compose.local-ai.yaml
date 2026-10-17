@@ -1,0 +1,93 @@
+# Optional overlay. Base editor/export CI never enables this profile or infers.
+x-ollama: &ollama
+  image: debotaro-studio-ollama:local
+  build:
+    context: .
+    dockerfile: Dockerfile.ollama
+  init: true
+  user: "1000:1000"
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 256
+  mem_limit: 6g
+  cpus: 2.0
+  environment: &ollama-environment
+    HOME: /tmp
+    OLLAMA_MODELS: /models
+    OLLAMA_HOST: 0.0.0.0:11434
+    OLLAMA_NO_CLOUD: "1"
+    OLLAMA_NUM_PARALLEL: "1"
+    OLLAMA_MAX_LOADED_MODELS: "1"
+    OLLAMA_MAX_QUEUE: "1"
+    OLLAMA_VULKAN: "0"
+    NVIDIA_VISIBLE_DEVICES: void
+    CUDA_VISIBLE_DEVICES: "-1"
+    HIP_VISIBLE_DEVICES: "-1"
+  volumes:
+    - ollama-models:/models
+  logging:
+    driver: json-file
+    options:
+      max-size: "5m"
+      max-file: "2"
+
+services:
+  studio:
+    environment:
+      AI_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:4b}
+      OLLAMA_TIMEOUT_MS: "120000"
+      STUDIO_AI_DAILY_REQUESTS: "100"
+      STUDIO_AI_USER_DAILY_REQUESTS: "10"
+      STUDIO_AI_CONCURRENT: "1"
+    networks: [default, local-ai]
+    depends_on:
+      ollama:
+        condition: service_healthy
+  ollama:
+    <<: *ollama
+    profiles: [local-ai, model-download]
+    networks: [local-ai]
+    # No host port and no external route; download models in the separate job.
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test: [CMD-SHELL, "OLLAMA_HOST=127.0.0.1:11434 ollama list >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+  ollama-pull:
+    <<: *ollama
+    profiles: [model-download]
+    networks: [default]
+    environment:
+      <<: *ollama-environment
+      OLLAMA_HOST: 127.0.0.1:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:4b}
+    # Explicit one-shot pull owns its daemon; it never shares the live server.
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        ollama serve &
+        daemon=$$!
+        trap 'kill "$$daemon" 2>/dev/null || true; wait "$$daemon" 2>/dev/null || true' EXIT
+        attempts=0
+        until ollama list >/dev/null 2>&1; do
+          attempts=$$((attempts + 1))
+          [ "$$attempts" -lt 60 ] || exit 1
+          sleep 1
+        done
+        ollama pull "$$OLLAMA_MODEL"
+    restart: "no"
+
+volumes:
+  ollama-models:
+
+networks:
+  local-ai:
+    internal: true
