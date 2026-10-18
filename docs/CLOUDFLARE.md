@@ -1,6 +1,6 @@
 # Card-free Cloudflare deployment
 
-Current deployment target, 18 October 2026: Cloudflare **Workers Free**, SQLite Durable Objects, static assets and Workers AI. The owner's authenticated dashboard shows Free ($0) as the current plan. No card, billing setup, paid upgrade, external model key, VM or paid fallback is part of this deployment. The core application is publicly accepted at https://debotaro-studio.debotaro-studio.workers.dev. Limited Wrangler authorization and the repository-restricted GitHub integration have been completed. The compact AI release awaits its CI-gated deployment and public model acceptance; local tests are reported separately.
+Current deployment target, 18 October 2026: Cloudflare **Workers Free**, SQLite Durable Objects, static assets and Workers AI. The owner's authenticated dashboard shows Free ($0) as the current plan. No card, billing setup, paid upgrade, external model key, VM or paid fallback is part of this deployment. The core application is publicly accepted at https://debotaro-studio.debotaro-studio.workers.dev. Limited Wrangler authorization and the repository-restricted GitHub integration have been completed. Workers AI is enabled. Controlled public API checks and the corrected real-model staging UI journey are recorded separately in [acceptance evidence](CLOUDFLARE_VERIFICATION.md); every automatic deployment waits for the exact source revision to pass CI.
 
 ## Runtime
 

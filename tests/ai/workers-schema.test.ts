@@ -15,4 +15,5 @@ it('compacts only optional nullable maps, retaining strict operation/project bou
   expect(update.properties.patch!.properties.name).toEqual({ type: 'string' });
   expect(JSON.stringify(proposalResponseSchema)).toBe(before);
   expect(operations.some(item => item.properties.type.enum.includes('replace'))).toBe(false);
+  expect(JSON.stringify(workersProposalSchema)).not.toContain('"uniqueItems"');
 });

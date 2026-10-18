@@ -49,6 +49,7 @@ describe('Workers partial-map wire regression', () => {
     unsafe.groups[0].operations[0].patch.props = JSON.parse('{"__proto__":null}');
     expect(() => apply(unsafe)).toThrow(/Unsafe proposal key/);
     expect(() => apply(wire([{ type: 'update', nodeId: 'workspace-title', replaceMaps: ['unknown'], patch: { name: 'Denied' } }]))).toThrow(/Invalid AI map/);
+    expect(() => apply(wire([{ type: 'update', nodeId: 'workspace-title', replaceMaps: ['props', 'props'], patch: { name: 'Denied' } }]))).toThrow(/Invalid AI map/);
     expect(() => apply(wire([{ type: 'update', nodeId: 'workspace-title', patch: { props: { unknown: null } } }]))).toThrow(/unknown is not supported/);
   });
   it('returns complete canonical operations with no provider control metadata', () => {

@@ -46,6 +46,7 @@ function configuredProvider(env: EdgeAIEnv, document: StudioDocument): AIProvide
     const response = await binding.run(WORKERS_AI_MODEL, inputs, options);
     if (!response.ok) {
       await response.body?.cancel();
+      if (response.status === 400) throw new AIError('The free model rejected the configured inference request. No changes were applied.', 'AI_PROVIDER_CONFIGURATION', 502);
       throw new AIError('Free model inference is unavailable or its quota is reached. No changes were applied.', 'AI_PROVIDER_FAILURE', 503);
     }
     if (!response.body || Number(response.headers.get('content-length')) > MAX_BYTES) {

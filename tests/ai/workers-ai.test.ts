@@ -33,6 +33,7 @@ describe('Workers AI transport fixtures — no live inference', () => {
   });
   it.each([
     ['quota', () => new Response('private provider detail', { status: 429 }), 'AI_PROVIDER_FAILURE'],
+    ['unsupported request', () => new Response('private schema details', { status: 400 }), 'AI_PROVIDER_CONFIGURATION'],
     ['invalid JSON', () => new Response('{'), 'AI_MALFORMED'],
     ['truncated', () => Response.json({ response: proposal(), finish_reason: 'length' }), 'AI_INCOMPLETE'],
     ['tool call', () => Response.json({ response: proposal(), tool_calls: [{}] }), 'AI_INCOMPLETE'],
