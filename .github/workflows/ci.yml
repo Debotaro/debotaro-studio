@@ -50,6 +50,42 @@ jobs:
             source & verification/artifacts/export-verification/*/*.log
             source & verification/artifacts/export-verification/*/browser/report.json
             source & verification/artifacts/export-verification/*/browser/*.png
+  cloudflare:
+    name: Cloudflare SQLite, WebSocket and browser runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.13.0'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build:edge
+      - run: npm run verify:edge
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser:edge
+      - name: Install, build and run the exact ZIP exported by workerd
+        shell: bash
+        run: |
+          archive=$(find artifacts/edge-verification -name export.zip -type f -print -quit)
+          test -n "$archive"
+          npm run verify:export -- --archive "$archive"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: cloudflare-runtime-verification
+          path: |
+            artifacts/edge-verification/*/report.json
+            artifacts/edge-verification/*/export.zip
+            artifacts/edge-browser-report/
+            artifacts/export-verification/*/report.json
+            artifacts/export-verification/*/*.log
+            artifacts/export-verification/*/browser/
   container:
     name: Persistent container runtime (${{ matrix.os }})
     needs: verify

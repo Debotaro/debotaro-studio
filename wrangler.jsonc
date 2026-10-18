@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "debotaro-studio",
+  "main": "edge/index.ts",
+  "compatibility_date": "2026-07-29",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*", "/collaborate", "/collaborate/"]
+  },
+  "durable_objects": {
+    "bindings": [{"name": "STUDIO", "class_name": "StudioAuthority"}]
+  },
+  "migrations": [{"tag": "studio-sqlite-v1", "new_sqlite_classes": ["StudioAuthority"]}],
+  "ai": {"binding": "AI"},
+  "vars": {
+    "AI_PROVIDER": "disabled",
+    "STUDIO_MAX_DATABASE_MB": "64",
+    "STUDIO_MAX_PROJECTS": "250",
+    "STUDIO_MAX_PROJECTS_PER_OWNER": "10",
+    "STUDIO_MAX_VERSIONS": "50",
+    "STUDIO_MAX_HISTORY": "1000",
+    "STUDIO_MAX_CONNECTIONS": "50",
+    "STUDIO_MAX_CONNECTIONS_PER_USER": "5",
+    "STUDIO_AI_DAILY_REQUESTS": "20",
+    "STUDIO_AI_USER_DAILY_REQUESTS": "2",
+    "STUDIO_AI_CONCURRENT": "1"
+  }
+}

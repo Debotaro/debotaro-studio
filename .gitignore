@@ -8,3 +8,8 @@ artifacts/
 playwright-report/
 test-results/
 *.tsbuildinfo
+.wrangler/
+.dev.vars
+.dev.vars.*
+edge/generated/
+edge-dist/

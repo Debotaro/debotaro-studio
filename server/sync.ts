@@ -1,15 +1,16 @@
 import * as Y from 'yjs';
 import { randomUUID } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 import { applyOperations, serializeDocument } from '../src/core/document';
 import type { StudioDocument, Operation, OperationEnvelope, User } from '../src/core/types';
-import type { Store } from './store';
+import type { StoreCore } from './storage/core';
 
 export interface Submission { envelope: OperationEnvelope; expected?: Record<string,string>; strict?: boolean }
 import { touchedValues } from '../src/core/preconditions';
 export { touchedValues } from '../src/core/preconditions';
 export class SyncEngine {
   private rooms = new Map<string,Y.Doc>();
-  constructor(readonly store: Store){}
+  constructor(readonly store: StoreCore){}
   room(projectId:string){
     let room=this.rooms.get(projectId);
     if(!room){

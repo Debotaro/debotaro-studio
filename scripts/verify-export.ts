@@ -165,6 +165,9 @@ async function main(): Promise<void> {
   await saveReport();
   let preview: ReturnType<typeof startCommand> | undefined;
   try {
+    const archiveArgument = process.argv.indexOf('--archive');
+    const externalArchive = archiveArgument < 0 ? undefined : process.argv[archiveArgument + 1];
+    if (archiveArgument >= 0 && !externalArchive) throw new Error('--archive requires a ZIP path.');
     const document = createStarterDocument('debotaro-verified-export-example');
     Object.assign(document.tokens.primitive, { exportGap: 24, exportTitle: 28, exportWeight: 700, exportPhonePadding: 12 });
     Object.assign(document.tokens.semantic, { exportGap: '$primitive.exportGap', exportTitle: '$primitive.exportTitle', exportWeight: '$primitive.exportWeight' });
@@ -174,14 +177,18 @@ async function main(): Promise<void> {
     Object.assign(document.nodes['workspace-title'].props, { size: '$semantic.exportTitle', weight: '$semantic.exportWeight' });
     const customText = '// Handwritten code remains a nonexecuted recovery artifact.\nthrow new Error("DEBOTARO_UNTRUSTED_EXPORT_SENTINEL");\n';
     const source = customText + compileDocument(document).code;
-    const files = await generateProject(document, source);
-    assert(files['recovery/custom-code.txt'].includes(customText), 'Custom source was not retained.');
-    for (const [name, text] of Object.entries(files)) if (!name.startsWith('recovery/')) assert(!text.includes('DEBOTARO_UNTRUSTED_EXPORT_SENTINEL'), `Untrusted source leaked into ${name}.`);
+    const receivedArchive = externalArchive ? await readFile(resolve(externalArchive)) : undefined;
+    const files = receivedArchive ? Object.fromEntries(Object.entries(unzipSync(receivedArchive)).map(([name, bytes]) => [name, strFromU8(bytes)])) : await generateProject(document, source);
+    if (!receivedArchive) {
+      assert(files['recovery/custom-code.txt'].includes(customText), 'Custom source was not retained.');
+      for (const [name, text] of Object.entries(files)) if (!name.startsWith('recovery/')) assert(!text.includes('DEBOTARO_UNTRUSTED_EXPORT_SENTINEL'), `Untrusted source leaked into ${name}.`);
+    }
     await materialize(directory, files);
-    const archive = zipSync(Object.fromEntries(Object.entries(files).map(([name, text]) => [name, strToU8(text)])), { level: 6 });
+    const archive = receivedArchive ?? zipSync(Object.fromEntries(Object.entries(files).map(([name, text]) => [name, strToU8(text)])), { level: 6 });
     verifyArchive(archive, files);
     await writeFile(resolve(run, 'generated-project.zip'), archive);
-    report.generated = { projectId: document.id, revision: document.revision, schemaVersion: document.schemaVersion, fileCount: Object.keys(files).length, filesSha256: Object.fromEntries(Object.entries(files).map(([name, text]) => [name, hash(text)])), archiveSha256: hash(archive), archiveBytes: archive.byteLength, customCode: 'Plain text recovery only; a throw sentinel would fail browser checks if executed.' };
+    const exportedDocument = JSON.parse(files['studio-document.json']);
+    report.generated = { origin: externalArchive ? 'received ZIP from API verification' : 'native generator', projectId: exportedDocument.id, revision: exportedDocument.revision, schemaVersion: exportedDocument.schemaVersion, fileCount: Object.keys(files).length, filesSha256: Object.fromEntries(Object.entries(files).map(([name, text]) => [name, hash(text)])), archiveSha256: hash(archive), archiveBytes: archive.byteLength, customCode: receivedArchive ? 'Received archive; no custom-code assertion made.' : 'Plain text recovery only; a throw sentinel would fail browser checks if executed.' };
     await saveReport();
     for (const [name, args] of [['install', ['ci', '--no-audit', '--no-fund']], ['typecheck', ['run', 'typecheck']], ['build', ['run', 'build']]] as const) {
       console.log(`Export verification: ${name}`);
@@ -195,7 +202,7 @@ async function main(): Promise<void> {
     preview = startCommand([npmCli, 'run', 'preview', '--', '--port', String(port), '--strictPort'], directory);
     await awaitPreview(url, preview.child);
     report.preview = { url, command: [process.execPath, npmCli, 'run', 'preview', '--', '--port', String(port), '--strictPort'], startedAt: preview.startedAt, pid: preview.child.pid };
-    await runCommand([require.resolve('tsx/cli'), resolve(root, 'tests/export/verify-interactions.ts'), url, browserDirectory, '--numeric-tokens'], root, resolve(run, 'browser.log'));
+    await runCommand([require.resolve('tsx/cli'), resolve(root, 'tests/export/verify-interactions.ts'), url, browserDirectory, ...(receivedArchive ? [] : ['--numeric-tokens'])], root, resolve(run, 'browser.log'));
     report.browser = JSON.parse(await readFile(resolve(browserDirectory, 'report.json'), 'utf8'));
     await assertOriginalFiles(directory, files);
     verifyArchive(await readFile(resolve(run, 'generated-project.zip')), files);
@@ -206,10 +213,12 @@ async function main(): Promise<void> {
     await writeFile(resolve(run, 'preview.log'), preview.output.join(''));
     report.previewStopped = true;
     preview = undefined;
-    const publicExample = resolve(root, 'docs/export-example.zip');
-    await writeFile(publicExample, archive);
-    assert.equal(hash(await readFile(publicExample)), hash(archive), 'Public example differs from the verified archive.');
-    report.publicExample = { path: 'docs/export-example.zip', sha256: hash(archive), sourceBytesVerified: true };
+    if (!receivedArchive) {
+      const publicExample = resolve(root, 'docs/export-example.zip');
+      await writeFile(publicExample, archive);
+      assert.equal(hash(await readFile(publicExample)), hash(archive), 'Public example differs from the verified archive.');
+      report.publicExample = { path: 'docs/export-example.zip', sha256: hash(archive), sourceBytesVerified: true };
+    }
     report.status = 'pass';
   } catch (error) {
     report.status = 'fail';

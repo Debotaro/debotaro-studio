@@ -96,7 +96,7 @@ class Client {
 }
 const wsUrl = id => `${base.replace('http:', 'ws:')}/collaborate?projectId=${encodeURIComponent(id)}`;
 const connect = async (client, id) => {
-  const socket = new WebSocket(wsUrl(id), { headers: { Origin: base, Cookie: client.cookie } });
+  const socket = new WebSocket(wsUrl(id), { headers: { Origin: base, Cookie: client.cookie }, handshakeTimeout: 3000 });
   peers.add(socket);
   const messages = [];
   socket.on('message', raw => messages.push(JSON.parse(raw.toString())));

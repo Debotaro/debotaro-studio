@@ -1,5 +1,7 @@
 # Debotaro Studio
 
+**Deployment update — 18 October 2026:** the selected card-free ₹0 target is [Cloudflare Workers Free](docs/CLOUDFLARE.md), with real SQLite Durable Objects, native collaboration WebSockets, bundled independent export and a bounded Workers AI adapter. Local acceptance is in progress; no live URL or live model pass is claimed yet. Oracle Cloud is no longer a deployment target because it requires a bank card. The native Node/Docker runtime remains supported.
+
 A visual application builder that connects structured design, a documented React/TypeScript subset, collaborative editing and independent export. Its starter is a functioning fictional customer-support workspace.
 
 **By Debotaro — Digital Designer | AI-Assisted Product Design & Development.** Debotaro defined the product direction, audience, requirements and visual goals. Implementation was developed with Codex through scoped tasks, contracts, review and executable verification. No interviews, adoption, business impact or manual authorship of every line is claimed.

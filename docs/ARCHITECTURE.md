@@ -1,5 +1,7 @@
 # Implemented architecture — updated 15 October 2026
 
+**18 October runtime extension:** [Cloudflare architecture and deployment](CLOUDFLARE.md) documents the additional actual Worker/SQLite Durable Object/WebSocket implementation, shared StoreCore, pure bundled export and Workers AI adapter. The native architecture below remains supported. Public deployment is pending authorization and acceptance.
+
 Independent application source; the existing portfolio is a separate project. React19.3/Vite8 SPA, Node24.13 Express5 HTTP/WebSocket service, built-in experimental SQLite. Vite middleware in development; same service serves dist plus public screenshot/assets in production. Installed versions: docs/DEPENDENCIES.md.
 
 ## Modules and ownership
