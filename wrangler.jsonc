@@ -18,7 +18,8 @@
   "migrations": [{"tag": "studio-sqlite-v1", "new_sqlite_classes": ["StudioAuthority"]}],
   "ai": {"binding": "AI"},
   "vars": {
-    "AI_PROVIDER": "disabled",
+    "AI_PROVIDER": "workers-ai",
+    "CF_AI_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     "STUDIO_MAX_DATABASE_MB": "64",
     "STUDIO_MAX_PROJECTS": "250",
     "STUDIO_MAX_PROJECTS_PER_OWNER": "10",

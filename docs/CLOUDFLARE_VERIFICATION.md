@@ -1,5 +1,19 @@
 # Cloudflare acceptance checkpoint — 18 October 2026
 
+## Public core acceptance
+
+The full core application is live at https://debotaro-studio.debotaro-studio.workers.dev. First deployed version: `5a020109-1746-4245-b9c3-988f619bd10e`, source `7223600ebbe9c6d46529ae7a02a2ef45e5a6db12`. All five jobs in [CI run 39088486853](https://github.com/Debotaro/debotaro-studio/actions/runs/39088486853) succeeded, including Windows/Linux, actual workerd and AMD64/ARM64 native containers.
+
+Public acceptance passed **23/23 actual browser cases (3.7 minutes)** and **8/8 HTTP/WSS runtime groups**: real sessions and server-side projects, authentication/origin/CSRF, persisted WebSocket edits, invitation/viewer restrictions, live revocation, versions/history and actual server ZIP generation. The public ZIP (`19` files; no custom-code recovery was supplied) SHA-256 is `dc8a0cdb55ac8b4eafb9a415a4bb554665ec18e32a56b8242c48f116b3d3e75a`. It passed its own clean install/typecheck/build and 12 Chromium interaction groups without Studio API calls. The newly registered subdomain initially failed TLS; public tests were rerun successfully after certificate activation, with no validation bypass.
+
+## Real model findings and correction
+
+Workers AI was called through the local workerd adapter using the actual authenticated **Free** account, fictional data only. The first full live set achieved four ordinary tasks; two ordinary responses were malformed at the 2,048-token output bound, one adversarial request timed out, and an adversarial foreign-project response was correctly rejected with 403 (the initial harness incorrectly expected only 400). No failed request automatically changed the document.
+
+The OpenAI-style required-null schema inflated small update responses. A Workers-specific compact schema now makes only the genuinely optional maps optional, while preserving required top-level/operation identity, closed objects and the same mandatory semantic validation. A regression checks that the native schema stays unchanged. With the compact schema, theme, heading, spacing, token and phone-layout tasks passed, as did both adversarial semantic refusals. A layer-name harness used nonexistent `workspace-label`; it was corrected to the actual `workspace-eyebrow`, and that sixth ordinary task passed on its own rerun. Ordinary successful outputs required explicit group acceptance and were read back from storage. These results are controlled small fixtures, not a general model-quality benchmark. Public model/UI acceptance of the compact release and persistence across its automatic deployment are still pending at this checkpoint.
+
+## Initial local acceptance
+
 Local Windows Node 24.13.0 verification, before account deployment:
 
 - Lint, native TypeScript and separate Worker TypeScript: pass.

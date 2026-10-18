@@ -1,6 +1,6 @@
 # Card-free Cloudflare deployment
 
-Current deployment target, 18 October 2026: Cloudflare **Workers Free**, SQLite Durable Objects, static assets and Workers AI. The owner's authenticated dashboard shows Free ($0) as the current plan. No card, billing setup, paid upgrade, external model key, VM or paid fallback is part of this deployment. Public deployment and live model acceptance are pending account authorization; local tests do not establish a live service.
+Current deployment target, 18 October 2026: Cloudflare **Workers Free**, SQLite Durable Objects, static assets and Workers AI. The owner's authenticated dashboard shows Free ($0) as the current plan. No card, billing setup, paid upgrade, external model key, VM or paid fallback is part of this deployment. The core application is publicly accepted at https://debotaro-studio.debotaro-studio.workers.dev. Limited Wrangler authorization and the repository-restricted GitHub integration have been completed. The compact AI release awaits its CI-gated deployment and public model acceptance; local tests are reported separately.
 
 ## Runtime
 
@@ -20,7 +20,7 @@ Application defaults in `wrangler.jsonc` are more conservative: 64 MB logical da
 
 The only eligible configured model is `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. It supports the reviewed JSON schema flow. The adapter bounds input/output, rejects incomplete, malformed, executable and foreign-project proposals, and has cancellation/deadline handling. Requests transmit the disclosed instruction, design layers/tokens and safe bindings; fictional ticket datasets, source drafts and server configuration are excluded. Valid output remains a proposal until the user reviews and accepts operation groups. No network tools or arbitrary model/provider selection is exposed to clients.
 
-`AI_PROVIDER` remains `disabled` until Free-plan verification and controlled remote acceptance. Transport fixtures are automated tests, not live model quality evidence. A failed or quota-limited AI request never silently applies edits.
+After actual Free-plan verification and controlled remote model acceptance, the deployment configuration selects `workers-ai` and the exact reviewed model. Local/CI browser tests explicitly override AI to disabled; they never call paid or remote models. Transport fixtures are automated tests, not live model quality evidence. A failed or quota-limited AI request never silently applies edits.
 
 ## Build and verify
 
@@ -41,3 +41,5 @@ Use the pinned local Wrangler CLI and owner-authorized OAuth, preferably OS keyr
 Durable Object SQLite storage persists across code deployments. Native `.studio-data` files are not automatically imported into this separate backend. Existing local work is retained; exporting it is supported. Do not reset the namespace/migration or delete stored objects to redeploy. Browser recovery downloads remain available for manual reconciliation; they are not a server backup/import mechanism. Cloudflare point-in-time recovery is host-specific; production backup/restore acceptance is still pending and no public backup claim is made.
 
 Primary references: [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [SQLite Durable Objects](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/), [Durable Object pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/), [WebSocket hibernation](https://developers.cloudflare.com/durable-objects/best-practices/websockets/), [Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/), [reviewed model](https://developers.cloudflare.com/workers-ai/models/llama-3.3-70b-instruct-fp8-fast/).
+
+GitHub integration is restricted to Debotaro/debotaro-studio, production branch main. The saved build command is npm run cloudflare:build; it builds the Worker, runs real workerd acceptance and waits for the same commit''s complete GitHub Verify Studio workflow to pass before allowing the deploy step. The gate rejects missing/failed CI, mismatched trigger/checkout and a stale main commit. No GitHub credential is required by this public read-only status check. The deploy command resolves the pinned installed Wrangler. .node-version pins Node 24.13.0. The first end-to-end automatic deployment remains to be observed at this checkpoint.

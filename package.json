@@ -19,7 +19,8 @@
     "build:edge": "npm run prepare:edge && npm run build && node scripts/prepare-edge-assets.mjs && npm run typecheck:edge && wrangler deploy --dry-run --outdir edge-dist",
     "dev:edge": "npm run prepare:edge && wrangler dev --ip 127.0.0.1 --port 4190",
     "verify:edge": "node scripts/verify-edge.mjs",
-    "test:browser:edge": "playwright test --config playwright.edge.config.ts"
+    "test:browser:edge": "playwright test --config playwright.edge.config.ts",
+    "cloudflare:build": "npm run build:edge && npm run verify:edge && node scripts/wait-for-ci.mjs"
   },
   "keywords": [],
   "author": "",

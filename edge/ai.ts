@@ -1,6 +1,7 @@
 /** Workers AI only: no external SDK, API key, gateway billing or provider fallback. */
 import type { Ai, AiModels, AiOptions } from '@cloudflare/workers-types';
-import { decodeProposalWire, proposalResponseSchema } from '../server/ai/schema';
+import { decodeProposalWire } from '../server/ai/schema';
+import { workersProposalSchema } from './ai-schema';
 import { AIError } from '../server/ai/validation';
 import { proposeWithProvider } from '../server/ai/shared';
 import type { AIProvider, ProposeChangesInput } from '../server/ai/shared';
@@ -33,9 +34,9 @@ function configuredProvider(env: EdgeAIEnv): AIProvider {
       throw new AIError('The free model context budget is exceeded. Use a smaller design; content was not truncated.', 'AI_CONTEXT_LIMIT');
     }
     const inputs: AiModels[typeof WORKERS_AI_MODEL]['inputs'] = {
-      messages: [{ role: 'system', content: instructions }, { role: 'user', content: input }],
+      messages: [{ role: 'system', content: instructions.replace('Strict schema requires null for absent optional map fields; null means omitted.', 'This provider supports optional map fields: omit absent optional fields instead of filling maps with nulls. Keep the response compact.') }, { role: 'user', content: input }],
       stream: false, max_tokens: 2048, temperature: 0, seed: 17,
-      response_format: { type: 'json_schema', json_schema: proposalResponseSchema },
+      response_format: { type: 'json_schema', json_schema: workersProposalSchema },
     };
     // The shared DOM/Node and Workers declarations use different Event types;
     // this is the same AbortSignal supplied by workerd at the binding boundary.
