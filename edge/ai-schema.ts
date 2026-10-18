@@ -24,3 +24,8 @@ function compact(value: unknown): unknown {
   return result;
 }
 export const workersProposalSchema = compact(proposalResponseSchema) as Schema;
+const root = workersProposalSchema.properties as Record<string, Schema>;
+const group = root.groups.items as Schema;
+const operations = ((group.properties as Record<string, Schema>).operations.items as Schema).anyOf as Schema[];
+const update = operations.find(item => (item.properties as Record<string, Schema>).type.enum instanceof Array && ((item.properties as Record<string, Schema>).type.enum as string[])[0] === 'update')!;
+(update.properties as Record<string, Schema>).replaceMaps = { type: 'array', items: { type: 'string', enum: ['props', 'layout', 'responsive', 'bindings', 'events'] }, maxItems: 5, uniqueItems: true };

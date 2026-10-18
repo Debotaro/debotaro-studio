@@ -14,6 +14,10 @@ The OpenAI-style required-null schema inflated small update responses. A Workers
 
 ## Initial local acceptance
 
+**Subsequent real UI finding:** after the first compact release, all eight public API cases passed their stated task/guardrail assertions. A deeper Chromium review/reject/accept journey exposed a missed property-retention invariant: the model supplied only `props.text`, so canonical map replacement removed the heading variant/formatting. This was an actual application integration defect, not a passing UI check. Two failed UI reports are retained privately with the exact scope.
+
+The Workers wire contract now explicitly uses partial maps. A pure decoder expands them against the validated project snapshot in dependency order, preserving untouched properties and responsive breakpoints before the unchanged canonical semantic validator runs. Optional `replaceMaps` makes intentional whole-map replacement/clearing explicit and is removed before canonical review/application. Raw proposal safety inspection runs before normalization, including prototype/accessor/complexity guards. Nine regression tests cover formatting, layout/responsive retention, explicit clearing, dependencies, inserted nodes, foreign/unknown/inherited nodes, unsafe keys and canonical output. The live evaluation harness now checks retained properties as well as target values. `npm run verify:ai:public` is a controlled real-model Chromium check, deliberately excluded from CI and automatic builds to avoid consuming inference allowances. Final public UI acceptance of this correction follows its next CI-gated deployment.
+
 Local Windows Node 24.13.0 verification, before account deployment:
 
 - Lint, native TypeScript and separate Worker TypeScript: pass.

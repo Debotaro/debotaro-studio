@@ -1,6 +1,8 @@
 /** Workers AI only: no external SDK, API key, gateway billing or provider fallback. */
 import type { Ai, AiModels, AiOptions } from '@cloudflare/workers-types';
-import { decodeProposalWire } from '../server/ai/schema';
+import { validateDocument } from '../src/core/document';
+import type { StudioDocument } from '../src/core/types';
+import { decodeWorkersProposal } from './ai-wire';
 import { workersProposalSchema } from './ai-schema';
 import { AIError } from '../server/ai/validation';
 import { proposeWithProvider } from '../server/ai/shared';
@@ -24,7 +26,7 @@ export function aiStatus(env: EdgeAIEnv) {
     reason: available ? null : 'No reviewed free model is enabled. Editing and export remain available.' };
 }
 
-function configuredProvider(env: EdgeAIEnv): AIProvider {
+function configuredProvider(env: EdgeAIEnv, document: StudioDocument): AIProvider {
   if (!aiStatus(env).available || !env.AI) {
     throw new AIError('No reviewed free Workers AI provider is enabled. Editing and export remain available.', 'AI_UNAVAILABLE', 503);
   }
@@ -34,7 +36,7 @@ function configuredProvider(env: EdgeAIEnv): AIProvider {
       throw new AIError('The free model context budget is exceeded. Use a smaller design; content was not truncated.', 'AI_CONTEXT_LIMIT');
     }
     const inputs: AiModels[typeof WORKERS_AI_MODEL]['inputs'] = {
-      messages: [{ role: 'system', content: instructions.replace('Strict schema requires null for absent optional map fields; null means omitted.', 'This provider supports optional map fields: omit absent optional fields instead of filling maps with nulls. Keep the response compact.') }, { role: 'user', content: input }],
+      messages: [{ role: 'system', content: instructions.replace('Update patches REPLACE supplied maps, so include retained map properties.', 'For this provider update patches are PARTIAL maps: omitted properties are preserved by the server. Include only changed properties. To intentionally replace or clear an entire map, add replaceMaps containing the map names (props, layout, responsive, bindings, events) and provide the complete replacement map. Do not use replaceMaps for ordinary text, style or spacing edits.').replace('Strict schema requires null for absent optional map fields; null means omitted.', 'This provider supports optional map fields: omit absent optional fields instead of filling maps with nulls. Keep the response compact.') }, { role: 'user', content: input }],
       stream: false, max_tokens: 2048, temperature: 0, seed: 17,
       response_format: { type: 'json_schema', json_schema: workersProposalSchema },
     };
@@ -78,12 +80,13 @@ function configuredProvider(env: EdgeAIEnv): AIProvider {
       try { proposal = JSON.parse(proposal); }
       catch { throw new AIError('The free model returned malformed structured output. No changes were applied.', 'AI_MALFORMED', 502); }
     }
-    return decodeProposalWire(proposal);
+    return decodeWorkersProposal(proposal, document);
   } };
 }
 
 export function proposeChanges(input: Omit<ProposeChangesInput, 'provider'>, env: EdgeAIEnv) {
   // DO routes must enforce their durable request reservations, role and revision checks too.
-  const { document, prompt, signal, role } = input;
-  return proposeWithProvider({ document, prompt, signal, role }, () => configuredProvider(env));
+  const { prompt, signal, role } = input;
+  const document = validateDocument(input.document);
+  return proposeWithProvider({ document, prompt, signal, role }, () => configuredProvider(env, document));
 }

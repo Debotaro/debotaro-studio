@@ -1,0 +1,77 @@
+// Controlled public Chromium acceptance. Never sends personal/customer data.
+import assert from 'node:assert/strict';
+import { chromium } from '@playwright/test';
+import console from 'node:console';
+import process from 'node:process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { fileURLToPath, URL } from 'node:url';
+import { resolve } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
+import { randomUUID } from 'node:crypto';
+const base = 'https://debotaro-studio.debotaro-studio.workers.dev';
+const output = fileURLToPath(new URL(`../artifacts/public-ai-ui/${randomUUID()}/`, import.meta.url));
+await mkdir(output, { recursive: true });
+const browser = await chromium.launch({ headless: true });
+const report = { endpoint: base, artifacts: output, realInference: true, data: 'fictional starter only', checks: [], startedAt: new Date().toISOString() };
+const contexts = [];
+const open = async name => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } }); contexts.push(context);
+  const page = await context.newPage(); page.setDefaultTimeout(15000);
+  await page.goto(base); await page.getByRole('textbox', { name: 'Your display name' }).fill(name);
+  await page.getByRole('button', { name: 'Open your private demo' }).click();
+  await page.locator('.sync-status').filter({ hasText: /^Live$/ }).waitFor();
+  const id = await page.getByRole('combobox', { name: 'Project', exact: true }).inputValue();
+  const document = async () => (await (await page.request.get(`${base}/api/projects/${id}`)).json()).document;
+  return { page, id, document };
+};
+try {
+  const owner = await open('Fictional Public AI Reviewer'), { page } = owner;
+  const before = await owner.document();
+  await page.getByRole('button', { name: /AI assistant/ }).click();
+  await page.getByRole('dialog').getByText(/Configured · Cloudflare Workers AI/).waitFor();
+  await page.getByRole('textbox', { name: 'What would you like to change?' }).fill('Change the application theme to dark. Use one theme operation only.');
+  await page.getByRole('button', { name: 'Propose changes', exact: true }).click();
+  await page.locator('.proposal-list').waitFor({ timeout: 70000 });
+  assert.deepEqual(await owner.document(), before);
+  await page.screenshot({ path: resolve(output, 'review-before-apply.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Reject proposal', exact: true }).click();
+  assert.equal(await page.locator('.proposal-list').count(), 0); assert.deepEqual(await owner.document(), before);
+  report.checks.push('real model proposal visible with provider disclosure; no automatic edit; reject preserves saved document');
+  await page.getByRole('textbox', { name: 'What would you like to change?' }).fill('Set workspace-title text to exactly "Reviewed changes stay in your hands." Include the final period. Retain every other property, including variant title, color, size and weight.');
+  await page.getByRole('button', { name: 'Propose changes', exact: true }).click();
+  await page.locator('.proposal-list').waitFor({ timeout: 70000 });
+  assert.deepEqual(await owner.document(), before);
+  await page.getByRole('button', { name: 'Accept selected groups', exact: true }).click();
+  await page.getByRole('dialog').waitFor({ state: 'hidden' });
+  const accepted = await owner.document(); report.acceptedTitleProps = accepted.nodes['workspace-title'].props; assert.deepEqual(accepted.nodes['workspace-title'].props, { ...before.nodes['workspace-title'].props, text: 'Reviewed changes stay in your hands.' });
+  await page.frameLocator('iframe').getByRole('heading', { name: 'Reviewed changes stay in your hands.', exact: true }).waitFor();
+  assert.equal(accepted.revision, before.revision + 1); assert.equal(accepted.nodes['workspace-title'].props.text, 'Reviewed changes stay in your hands.');
+  await page.reload(); await page.frameLocator('iframe').getByRole('heading', { name: 'Reviewed changes stay in your hands.', exact: true }).waitFor();
+  assert.deepEqual(await owner.document(), accepted);
+  await page.screenshot({ path: resolve(output, 'accepted-editor.png'), fullPage: true });
+  report.checks.push('explicit selected-group acceptance changes expected heading, persists and survives real browser reload');
+  const denied = await page.request.post(`${base}/api/projects/${owner.id}/ai/propose`, { headers: { Origin: base, 'X-Studio-Request': '1' }, data: { prompt: 'Use dark theme', baseRevision: accepted.revision } });
+  assert.equal(denied.status(), 429); assert.equal((await denied.json()).code, 'AI_ALLOWANCE'); assert.deepEqual(await owner.document(), accepted);
+  report.checks.push('third same-identity AI attempt is durably refused before inference; saved work retained');
+  const cancel = await open('Fictional Public AI Cancellation'); const cancelBefore = await cancel.document();
+  await cancel.page.getByRole('button', { name: /AI assistant/ }).click();
+  await cancel.page.getByRole('textbox', { name: 'What would you like to change?' }).fill('Use dark theme.');
+  const started = cancel.page.waitForRequest(request => request.url().endsWith('/ai/propose'));
+  await cancel.page.getByRole('button', { name: 'Propose changes', exact: true }).click(); await started;
+  await cancel.page.getByRole('button', { name: 'Cancel request', exact: true }).click();
+  await cancel.page.getByRole('button', { name: 'Propose changes', exact: true }).waitFor();
+  await delay(6000); assert.deepEqual(await cancel.document(), cancelBefore); assert.equal(await cancel.page.locator('.proposal-list').count(), 0);
+  report.checks.push('cancelled real browser request presents no proposal and never applies edits; backend compute cancellation is not claimed');
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await page.evaluate(() => globalThis.document.documentElement.scrollWidth <= globalThis.innerWidth), true);
+  await page.screenshot({ path: resolve(output, 'accepted-phone.png'), fullPage: true });
+  report.checks.push('accepted workspace remains usable at 390px without page overflow');
+  report.passed = true;
+} catch (error) { report.passed = false; report.error = String(error); }
+finally {
+  for (const context of contexts) await context.close(); await browser.close();
+  report.completedAt = new Date().toISOString();
+  await writeFile(resolve(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
+  console.log(JSON.stringify(report, null, 2));
+  if (!report.passed) process.exitCode = 1;
+}

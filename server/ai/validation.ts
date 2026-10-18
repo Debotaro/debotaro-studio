@@ -9,7 +9,7 @@ function reject(message: string, code = 'INVALID_PROPOSAL', status = 400): never
 export function requireEditor(role: Role): void {
   if (role !== 'owner' && role !== 'editor') reject('An editor or owner permission is required for AI changes.', 'AI_PERMISSION_DENIED', 403);
 }
-function inspect(value: unknown, depth = 0, ancestors = new Set<object>(), budget = { count: 0 }): void {
+export function inspectProposalData(value: unknown, depth = 0, ancestors = new Set<object>(), budget = { count: 0 }): void {
   if (++budget.count > 40000 || depth > 32) reject('The proposal exceeds its complexity limit.');
   if (value === null || typeof value === 'boolean') return;
   if (typeof value === 'string') { if (value.length > 10000) reject('Proposal strings exceed the length limit.'); return; }
@@ -24,7 +24,7 @@ function inspect(value: unknown, depth = 0, ancestors = new Set<object>(), budge
     if (['__proto__', 'prototype', 'constructor'].includes(key)) reject('Unsafe proposal key.');
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (!descriptor || !('value' in descriptor) || !descriptor.enumerable) reject('Proposal accessors and hidden properties are forbidden.');
-    inspect(descriptor.value, depth + 1, ancestors, budget);
+    inspectProposalData(descriptor.value, depth + 1, ancestors, budget);
   }
   if (Array.isArray(value) && (value.length > 5000 || Object.keys(value).length !== value.length)) reject('Proposal arrays must be bounded and contain present values.');
   ancestors.delete(value);
@@ -101,7 +101,7 @@ function rejectContradictions(group: ProposalGroup): void {
 export function validateProposal(input: unknown, baseDocument: StudioDocument, role: Role): AIProposal {
   requireEditor(role);
   const doc = validateDocument(baseDocument);
-  inspect(input);
+  inspectProposalData(input);
   const proposal = object(input, ['projectId', 'baseRevision', 'summary', 'groups'], 'proposal');
   if (proposal.projectId !== doc.id) reject('The proposal targets an inaccessible project.', 'PROJECT_MISMATCH', 403);
   if (proposal.baseRevision !== doc.revision) reject('The proposal is stale. Request a new proposal against the current design.', 'STALE_PROPOSAL', 409);

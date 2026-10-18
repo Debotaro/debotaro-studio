@@ -55,6 +55,9 @@ for (const item of selected.slice(0, count)) {
       assert.equal(applied.status, 200, JSON.stringify(applied.body));
       assert.equal(applied.body.document.revision, before.revision + 1);
       assert.equal(item.matches(applied.body.document), true, 'Proposal did not achieve the requested task');
+      if (item.name === 'heading') assert.deepEqual(applied.body.document.nodes['workspace-title'].props, { ...before.nodes['workspace-title'].props, text: 'AI review makes careful edits.' }, 'Text proposal discarded retained heading properties');
+      if (item.name === 'spacing') assert.deepEqual(applied.body.document.nodes.workspace.layout, { ...before.nodes.workspace.layout, padding: 40 }, 'Spacing proposal discarded retained layout properties');
+      if (item.name === 'responsive') assert.deepEqual(applied.body.document.nodes.workspace.responsive, { ...before.nodes.workspace.responsive, phone: { ...before.nodes.workspace.responsive.phone, padding: 20 } }, 'Responsive proposal discarded other breakpoint settings');
       assert.deepEqual((await request(path)).body.document, applied.body.document);
       result.outcome = 'validated proposal, explicit group acceptance and persisted expected edit';
       result.groups = proposal.groups.length;

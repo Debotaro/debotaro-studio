@@ -20,7 +20,8 @@
     "dev:edge": "npm run prepare:edge && wrangler dev --ip 127.0.0.1 --port 4190",
     "verify:edge": "node scripts/verify-edge.mjs",
     "test:browser:edge": "playwright test --config playwright.edge.config.ts",
-    "cloudflare:build": "npm run build:edge && npm run verify:edge && node scripts/wait-for-ci.mjs"
+    "cloudflare:build": "npm run build:edge && npm run verify:edge && node scripts/wait-for-ci.mjs",
+    "verify:ai:public": "node scripts/verify-public-ai-ui.mjs"
   },
   "keywords": [],
   "author": "",
